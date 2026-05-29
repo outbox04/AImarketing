@@ -1,0 +1,73 @@
+import { AlertTriangle, Copy, ExternalLink, Pencil, ShieldCheck, ThumbsUp, X } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { approvalStatusMeta, priorityMeta } from "@/lib/status";
+import type { ApprovalItem } from "@/types/content";
+import { MediaPreview } from "./MediaPreview";
+
+type ApprovalCardProps = {
+  item: ApprovalItem;
+  compact?: boolean;
+};
+
+export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
+  const status = approvalStatusMeta[item.status];
+  const priority = priorityMeta[item.priority];
+  const canAutoPost = item.status === "APPROVED";
+
+  return (
+    <Card className={compact ? "p-4" : undefined}>
+      <div className={compact ? "grid gap-4" : "grid gap-5 lg:grid-cols-[280px_1fr]"}>
+        <MediaPreview src={item.mediaSrc} alt={item.title} />
+        <div className="min-w-0">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Badge className={status.className}>{status.label}</Badge>
+            <Badge className={priority.className}>{priority.label}</Badge>
+            <Badge className={canAutoPost ? "border-green-200 bg-success-soft text-green-700" : "border-border bg-surface-soft text-text-muted"}>
+              Auto post: {canAutoPost ? "Sẵn sàng" : "Chưa đủ điều kiện"}
+            </Badge>
+          </div>
+          <h3 className="text-lg font-bold text-text-main">{item.title}</h3>
+          <p className="mt-1 text-sm font-semibold text-text-muted">
+            {item.channel} · {item.scheduledAt} · {item.campaign}
+          </p>
+          <p className="mt-4 text-sm leading-6 text-text-main">{item.caption}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {item.hashtags.map((tag) => (
+              <span key={tag} className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl bg-surface-soft p-3">
+              <p className="text-xs font-bold uppercase text-text-soft">CTA</p>
+              <p className="mt-1 text-sm font-semibold text-text-main">{item.cta ?? "Chưa có CTA"}</p>
+            </div>
+            <div className="rounded-2xl bg-surface-soft p-3">
+              <p className="text-xs font-bold uppercase text-text-soft">AI review score</p>
+              <p className="mt-1 text-sm font-semibold text-text-main">{item.aiScore}/100 · {item.aiRiskNote}</p>
+            </div>
+          </div>
+          {item.warnings.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-warning-soft p-3">
+              <div className="flex gap-2 text-sm font-semibold text-amber-800">
+                <AlertTriangle size={18} />
+                {item.warnings.join(" · ")}
+              </div>
+            </div>
+          ) : null}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button size="sm" variant="secondary"><Copy size={16} /> Copy caption</Button>
+            <Button size="sm" variant="primary"><ThumbsUp size={16} /> Approve</Button>
+            <Button size="sm" variant="secondary"><Pencil size={16} /> Request Revision</Button>
+            <Button size="sm" variant="danger"><X size={16} /> Reject</Button>
+            <Button size="sm" variant="secondary"><ExternalLink size={16} /> Drive</Button>
+            {!compact ? <Button size="sm" variant="ghost"><ShieldCheck size={16} /> Edit Manual</Button> : null}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
