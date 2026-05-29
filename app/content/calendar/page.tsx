@@ -3,8 +3,13 @@ import { ContentCalendar } from "@/components/content/ContentCalendar";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
+import { getContentData } from "@/lib/data/marketing-data";
 
-export default function ContentCalendarPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ContentCalendarPage() {
+  const data = await getContentData();
+
   return (
     <div className="mx-auto max-w-[1600px]">
       <PageHeader
@@ -19,7 +24,7 @@ export default function ContentCalendarPage() {
           </>
         }
       />
-      <ContentCalendar />
+      <ContentCalendar contentPosts={data.contentPosts} />
     </div>
   );
 }

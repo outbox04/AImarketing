@@ -2,8 +2,13 @@ import { LayoutGrid, ListFilter } from "lucide-react";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { getTasksData } from "@/lib/data/marketing-data";
 
-export default function TasksPage() {
+export const dynamic = "force-dynamic";
+
+export default async function TasksPage() {
+  const data = await getTasksData();
+
   return (
     <div className="mx-auto max-w-[1600px]">
       <PageHeader
@@ -17,7 +22,7 @@ export default function TasksPage() {
           </>
         }
       />
-      <TaskKanban />
+      <TaskKanban tasks={data.tasks} />
     </div>
   );
 }

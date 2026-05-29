@@ -2,9 +2,14 @@
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card } from "@/components/ui/Card";
-import { chartData } from "@/lib/mock-data";
 
-export function ChartBlock() {
+type ChartPoint = {
+  name: string;
+  leads: number;
+  content: number;
+};
+
+export function ChartBlock({ chartData }: { chartData: ChartPoint[] }) {
   return (
     <Card>
       <h2 className="text-lg font-bold text-text-main">Hiệu suất tuần</h2>

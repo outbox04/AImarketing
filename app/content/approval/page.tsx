@@ -3,11 +3,15 @@ import { ApprovalCard } from "@/components/content/ApprovalCard";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
-import { approvalItems } from "@/lib/mock-data";
+import { getApprovalData } from "@/lib/data/marketing-data";
 
 const tabs = ["Tất cả", "Content", "Hình ảnh", "Video", "Website", "Cần duyệt hôm nay", "Cần sửa", "Đã duyệt"];
 
-export default function ApprovalPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ApprovalPage() {
+  const data = await getApprovalData();
+
   return (
     <div className="mx-auto max-w-[1400px]">
       <PageHeader
@@ -37,7 +41,7 @@ export default function ApprovalPage() {
         ))}
       </div>
       <div className="grid gap-5">
-        {approvalItems.map((item) => (
+        {data.approvalItems.map((item) => (
           <ApprovalCard key={item.id} item={item} />
         ))}
       </div>

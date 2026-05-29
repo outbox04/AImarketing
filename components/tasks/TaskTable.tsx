@@ -1,9 +1,9 @@
-import { tasks } from "@/lib/mock-data";
 import { priorityMeta, taskStatusMeta } from "@/lib/status";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import type { Task } from "@/types/task";
 
-export function TaskTable() {
+export function TaskTable({ tasks }: { tasks: Task[] }) {
   return (
     <Card className="overflow-hidden p-0">
       <div className="overflow-x-auto">

@@ -1,9 +1,8 @@
 import { CheckCircle2 } from "lucide-react";
-import { campaignEvents } from "@/lib/mock-data";
 import { Card } from "@/components/ui/Card";
+import type { CampaignEvent } from "@/types/event";
 
-export function EventChecklist() {
-  const event = campaignEvents[0];
+export function EventChecklist({ event }: { event: CampaignEvent }) {
   return (
     <Card>
       <h2 className="text-lg font-bold text-text-main">Checklist còn thiếu</h2>

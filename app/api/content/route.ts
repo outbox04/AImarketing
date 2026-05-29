@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { contentPosts } from "@/lib/mock-data";
+import { getContentData } from "@/lib/data/marketing-data";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ contentPosts });
+  const data = await getContentData();
+  return NextResponse.json({ contentPosts: data.contentPosts, source: data.source, errors: data.errors });
 }

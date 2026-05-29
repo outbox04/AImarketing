@@ -1,8 +1,8 @@
 import { AlertTriangle, Target } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { campaignEvents } from "@/lib/mock-data";
+import type { CampaignEvent } from "@/types/event";
 
-export function CampaignRadar() {
+export function CampaignRadar({ campaignEvents }: { campaignEvents: CampaignEvent[] }) {
   return (
     <Card>
       <div className="mb-5 flex items-center gap-3">

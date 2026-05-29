@@ -1,9 +1,9 @@
 import { ContentCard } from "./ContentCard";
-import { contentPosts } from "@/lib/mock-data";
+import type { ContentPost } from "@/types/content";
 
 const days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"];
 
-export function ContentCalendar() {
+export function ContentCalendar({ contentPosts }: { contentPosts: ContentPost[] }) {
   return (
     <div className="grid gap-4 lg:grid-cols-7">
       {days.map((day, index) => (

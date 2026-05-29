@@ -2,9 +2,13 @@ import { ShieldAlert } from "lucide-react";
 import { ContentCard } from "@/components/content/ContentCard";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { contentPosts } from "@/lib/mock-data";
+import { getContentData } from "@/lib/data/marketing-data";
 
-export default function AutoPostingPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AutoPostingPage() {
+  const data = await getContentData();
+
   return (
     <div className="mx-auto max-w-[1200px]">
       <PageHeader
@@ -17,7 +21,7 @@ export default function AutoPostingPage() {
         <p className="text-sm font-semibold leading-6 text-amber-800">Frontend không gọi Facebook/Google trực tiếp. Tất cả lệnh publish phải đi qua API route server-side.</p>
       </Card>
       <div className="grid gap-4 lg:grid-cols-2">
-        {contentPosts.map((post) => <ContentCard key={post.id} post={post} />)}
+        {data.contentPosts.map((post) => <ContentCard key={post.id} post={post} />)}
       </div>
     </div>
   );

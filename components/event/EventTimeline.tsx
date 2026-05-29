@@ -1,7 +1,7 @@
-import { campaignEvents } from "@/lib/mock-data";
 import { Card } from "@/components/ui/Card";
+import type { CampaignEvent } from "@/types/event";
 
-export function EventTimeline() {
+export function EventTimeline({ campaignEvents }: { campaignEvents: CampaignEvent[] }) {
   return (
     <Card>
       <h2 className="text-lg font-bold text-text-main">Timeline</h2>

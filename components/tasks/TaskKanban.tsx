@@ -1,11 +1,10 @@
-import { tasks } from "@/lib/mock-data";
 import { taskStatusMeta } from "@/lib/status";
-import type { TaskStatus } from "@/types/task";
+import type { Task, TaskStatus } from "@/types/task";
 import { TaskCard } from "./TaskCard";
 
 const columns: TaskStatus[] = ["INBOX", "TODO", "IN_PROGRESS", "WAITING", "DONE"];
 
-export function TaskKanban() {
+export function TaskKanban({ tasks }: { tasks: Task[] }) {
   return (
     <div className="grid gap-4 xl:grid-cols-5">
       {columns.map((column) => (

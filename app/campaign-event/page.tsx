@@ -3,11 +3,23 @@ import { EventTimeline } from "@/components/event/EventTimeline";
 import { VendorTable } from "@/components/event/VendorTable";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { campaignEvents } from "@/lib/mock-data";
+import { getEventData } from "@/lib/data/marketing-data";
 import { formatCurrency } from "@/lib/utils";
 
-export default function CampaignEventPage() {
-  const selected = campaignEvents[0];
+export const dynamic = "force-dynamic";
+
+export default async function CampaignEventPage() {
+  const data = await getEventData();
+  const selected = data.campaignEvents[0];
+
+  if (!selected) {
+    return (
+      <div className="mx-auto max-w-[1500px]">
+        <PageHeader eyebrow="Leadership Request" title="Campaign & Event" description="Chưa có dữ liệu campaign/event." />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-[1500px]">
       <PageHeader
@@ -17,7 +29,7 @@ export default function CampaignEventPage() {
       />
       <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
         <div className="space-y-3">
-          {campaignEvents.map((event) => (
+          {data.campaignEvents.map((event) => (
             <Card key={event.id} className={`p-4 ${event.id === selected.id ? "border-primary bg-primary-soft" : ""}`}>
               <h3 className="font-bold text-text-main">{event.name}</h3>
               <p className="mt-1 text-sm text-text-muted">{event.goal}</p>
@@ -35,7 +47,7 @@ export default function CampaignEventPage() {
               <div className="rounded-2xl bg-danger-soft p-4"><p className="text-xs font-bold uppercase text-red-400">Rủi ro</p><p className="mt-1 font-bold text-red-700">{selected.risk}</p></div>
             </div>
           </Card>
-          <div className="grid gap-6 lg:grid-cols-2"><EventTimeline /><EventChecklist /></div>
+          <div className="grid gap-6 lg:grid-cols-2"><EventTimeline campaignEvents={data.campaignEvents} /><EventChecklist event={selected} /></div>
           <VendorTable />
         </div>
       </div>

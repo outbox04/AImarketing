@@ -2,10 +2,14 @@ import { Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { adsReports } from "@/lib/mock-data";
+import { getAdsData } from "@/lib/data/marketing-data";
 import { formatCurrency } from "@/lib/utils";
 
-export default function AdsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdsPage() {
+  const data = await getAdsData();
+
   return (
     <div className="mx-auto max-w-[1400px]">
       <PageHeader
@@ -21,7 +25,7 @@ export default function AdsPage() {
               <tr><th className="px-5 py-4">Campaign</th><th className="px-5 py-4">Platform</th><th className="px-5 py-4">Budget</th><th className="px-5 py-4">Spend</th><th className="px-5 py-4">Lead</th><th className="px-5 py-4">CPL</th><th className="px-5 py-4">CTR</th><th className="px-5 py-4">Status</th></tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {adsReports.map((ad) => (
+              {data.adsReports.map((ad) => (
                 <tr key={ad.id}>
                   <td className="px-5 py-4 font-bold text-text-main">{ad.campaignName}</td>
                   <td className="px-5 py-4 text-text-muted">{ad.platform}</td>

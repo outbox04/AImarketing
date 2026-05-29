@@ -1,10 +1,13 @@
 import { SalesCopyCard } from "@/components/content/SalesCopyCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
-import { approvalItems } from "@/lib/mock-data";
+import { getApprovalData } from "@/lib/data/marketing-data";
 
-export default function SalesCopyPage() {
-  const approved = approvalItems.filter((item) => item.status === "APPROVED");
+export const dynamic = "force-dynamic";
+
+export default async function SalesCopyPage() {
+  const data = await getApprovalData();
+  const approved = data.approvalItems.filter((item) => item.status === "APPROVED");
   return (
     <div className="mx-auto max-w-[1200px]">
       <PageHeader

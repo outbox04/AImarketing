@@ -1,8 +1,40 @@
-import { Bot } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Bot, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { aiInsights } from "@/lib/mock-data";
+
+type AiResponse = {
+  ok: boolean;
+  content: string | null;
+  message?: string;
+  cached?: boolean;
+};
 
 export function AiInsightCard() {
+  const [result, setResult] = useState<AiResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function requestAiSuggestion() {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/ai/priority-recommendation", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          input: { screen: "dashboard", intent: "prioritize today" },
+          userAction: "Gợi ý AI"
+        })
+      });
+      setResult(await response.json());
+    } catch {
+      setResult({ ok: false, content: null, message: "AI hiện chưa phản hồi, bạn vẫn có thể xử lý thủ công." });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <Card className="bg-gradient-to-br from-white to-primary-soft">
       <div className="mb-5 flex items-center gap-3">
@@ -10,18 +42,22 @@ export function AiInsightCard() {
           <Bot size={19} />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-text-main">AI đề xuất hôm nay</h2>
-          <p className="text-sm text-text-muted">Tập trung vào việc có tác động và rủi ro cao nhất.</p>
+          <h2 className="text-lg font-bold text-text-main">Gợi ý AI</h2>
+          <p className="text-sm text-text-muted">Chỉ phân tích khi bạn chủ động yêu cầu.</p>
         </div>
       </div>
-      <ol className="space-y-3">
-        {aiInsights.slice(0, 3).map((insight, index) => (
-          <li key={insight} className="flex gap-3 rounded-2xl bg-white/80 p-3 text-sm font-semibold leading-6 text-text-main">
-            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary-soft text-xs text-primary">{index + 1}</span>
-            {insight}
-          </li>
-        ))}
-      </ol>
+
+      {result?.content ? (
+        <div className="rounded-2xl bg-white/80 p-3 text-sm font-semibold leading-6 text-text-main">{result.content}</div>
+      ) : (
+        <div className="rounded-2xl bg-white/80 p-3 text-sm leading-6 text-text-muted">
+          {result?.message ?? "Dashboard đang dùng số liệu rule-based. Bấm nút bên dưới nếu cần AI đề xuất ưu tiên."}
+        </div>
+      )}
+
+      <Button className="mt-4" size="sm" variant="primary" onClick={requestAiSuggestion} disabled={isLoading}>
+        <Sparkles size={16} /> {isLoading ? "Đang phân tích..." : "Gợi ý AI"}
+      </Button>
     </Card>
   );
 }

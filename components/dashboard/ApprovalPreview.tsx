@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { approvalItems } from "@/lib/mock-data";
 import { ApprovalCard } from "@/components/content/ApprovalCard";
+import type { ApprovalItem } from "@/types/content";
 
-export function ApprovalPreview() {
+export function ApprovalPreview({ approvalItems }: { approvalItems: ApprovalItem[] }) {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between gap-3">

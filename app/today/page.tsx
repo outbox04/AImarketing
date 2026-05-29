@@ -2,8 +2,13 @@ import { TodayTimeline } from "@/components/dashboard/TodayTimeline";
 import { AiInsightCard } from "@/components/dashboard/AiInsightCard";
 import { ApprovalPreview } from "@/components/dashboard/ApprovalPreview";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { getMarketingData } from "@/lib/data/marketing-data";
 
-export default function TodayPage() {
+export const dynamic = "force-dynamic";
+
+export default async function TodayPage() {
+  const data = await getMarketingData();
+
   return (
     <div className="mx-auto max-w-[1400px]">
       <PageHeader
@@ -13,10 +18,10 @@ export default function TodayPage() {
       />
       <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
         <div className="space-y-6">
-          <TodayTimeline />
+          <TodayTimeline tasks={data.tasks} />
           <AiInsightCard />
         </div>
-        <ApprovalPreview />
+        <ApprovalPreview approvalItems={data.approvalItems} />
       </div>
     </div>
   );

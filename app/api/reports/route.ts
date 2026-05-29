@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
-import { reportMetrics } from "@/lib/mock-data";
+import { getMarketingData } from "@/lib/data/marketing-data";
+import { getWorkloadSummary } from "@/lib/rules/marketing-rules";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ reportMetrics });
+  const data = await getMarketingData();
+  return NextResponse.json({
+    summary: getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports),
+    source: data.source,
+    errors: data.errors
+  });
 }

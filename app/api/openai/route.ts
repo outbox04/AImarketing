@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getOpenAiClient } from "@/lib/openai";
 
 export async function GET() {
-  const status = await getOpenAiClient();
-  return NextResponse.json({ ok: status.ok, message: status.message });
+  return NextResponse.json({
+    ok: Boolean(process.env.OPENAI_API_KEY),
+    message: "OpenAI is only available through /api/ai/* routes and is never required for dashboard load."
+  });
 }
