@@ -1,6 +1,6 @@
 import type { ContentPost } from "@/types/content";
 
-const days = ["Thu 2", "Thu 3", "Thu 4", "Thu 5", "Thu 6", "Thu 7", "CN"];
+const days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"];
 
 function stripVietnamese(value: string) {
   return value
@@ -68,11 +68,11 @@ export function ContentCalendar({ contentPosts }: { contentPosts: ContentPost[] 
                   <div key={post.id} className="rounded-2xl bg-surface-soft p-3">
                     <p className="text-xs font-bold text-primary">{post.channel}</p>
                     <p className="mt-1 text-sm font-semibold text-text-main">{post.title}</p>
-                    <p className="mt-1 text-xs text-text-muted">{post.scheduledAt || "Chua co ngay dang"}</p>
+                    <p className="mt-1 text-xs text-text-muted">{post.scheduledAt || "Chưa có ngày đăng"}</p>
                   </div>
                 ))
               ) : (
-                <p className="rounded-2xl bg-surface-soft p-3 text-xs font-semibold text-text-soft">Chua co lich dang</p>
+                <p className="rounded-2xl bg-surface-soft p-3 text-xs font-semibold text-text-soft">Chưa có lịch đăng</p>
               )}
             </div>
           </div>
