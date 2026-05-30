@@ -22,6 +22,15 @@ function parseVietnameseDateTime(value: string) {
   return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
 }
 
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
 export function isToday(value: string) {
   const parsed = parseVietnameseDateTime(value);
   if (parsed) {
@@ -107,7 +116,14 @@ export function getRiskFlags(tasks: Task[], contents: ApprovalItem[], events: Ca
   return flags;
 }
 
-export function getWorkloadSummary(tasks: Task[], contents: ApprovalItem[], events: CampaignEvent[], leads: Lead[], adsReports: AdsReport[]) {
+export function getWorkloadSummary(
+  tasks: Task[],
+  contents: ApprovalItem[],
+  events: CampaignEvent[],
+  leads: Lead[],
+  adsReports: AdsReport[],
+  scheduledContents: ContentPost[] = contents
+) {
   const pendingContent = getPendingApproval(contents);
   const overdueTasks = getOverdueTasks(tasks);
 
@@ -121,21 +137,32 @@ export function getWorkloadSummary(tasks: Task[], contents: ApprovalItem[], even
     pendingWebsite: getPendingByType(contents, "WEBSITE").length,
     pendingVideos: getPendingByType(contents, "VIDEO").length,
     runningEvents: getRunningEvents(events).length,
-    newLeads: leads.filter((lead) => lead.status.toLowerCase().includes("lead")).length,
+    newLeads: leads.filter((lead) => {
+      const status = normalizeText(lead.status);
+      return status.includes("lead") || status === "moi" || status.includes("mới");
+    }).length,
     adsSpend: adsReports.reduce((sum, report) => sum + report.spend, 0),
-    postedContent: contents.filter((item) => item.status === "APPROVED" || item.status === "SCHEDULED").length,
+    scheduledContent: getScheduledSoon(scheduledContents).length,
+    postedContent: scheduledContents.filter((item) => item.status === "APPROVED" || item.status === "SCHEDULED").length,
     riskFlags: getRiskFlags(tasks, contents, events, adsReports)
   };
 }
 
-export function getKpiSummary(tasks: Task[], contents: ApprovalItem[], events: CampaignEvent[], leads: Lead[], adsReports: AdsReport[]) {
-  const summary = getWorkloadSummary(tasks, contents, events, leads, adsReports);
+export function getKpiSummary(
+  tasks: Task[],
+  contents: ApprovalItem[],
+  events: CampaignEvent[],
+  leads: Lead[],
+  adsReports: AdsReport[],
+  scheduledContents: ContentPost[] = contents
+) {
+  const summary = getWorkloadSummary(tasks, contents, events, leads, adsReports, scheduledContents);
 
   return [
     { label: "Task hôm nay", value: summary.todayTasks, change: `${getInProgressTasks(tasks).length} đang làm`, tone: "primary" },
     { label: "Chờ duyệt", value: summary.pendingContent, change: `${summary.pendingImages + summary.pendingWebsite} cần kiểm tra`, tone: "warning" },
     { label: "Deadline trễ", value: summary.overdueTasks, change: summary.overdueTasks > 0 ? "Cần xử lý" : "Không có", tone: "danger" },
-    { label: "Bài sắp đăng", value: getScheduledSoon(contents).length, change: "Theo lịch content", tone: "info" },
+    { label: "Bài sắp đăng", value: summary.scheduledContent, change: "Theo lịch content", tone: "info" },
     { label: "Lead mới", value: summary.newLeads, change: "Từ CRM", tone: "success" },
     { label: "Campaign chạy", value: summary.runningEvents, change: `${summary.riskFlags.length} cảnh báo`, tone: "primary" }
   ];

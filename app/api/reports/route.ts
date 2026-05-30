@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const data = await getMarketingData();
   return NextResponse.json({
-    summary: getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports),
+    summary: getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports, data.contentPosts),
     source: data.source,
     errors: data.errors
   });

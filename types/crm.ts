@@ -1,4 +1,4 @@
-export type LeadStatus = "Lead mới" | "Đã liên hệ" | "Đang tư vấn" | "Báo giá" | "Chốt deal" | "Chăm sóc lại";
+export type LeadStatus = string;
 
 export type Lead = {
   id: string;

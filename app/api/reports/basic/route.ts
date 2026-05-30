@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const data = await getMarketingData();
-  const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports);
+  const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports, data.contentPosts);
   const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "/dashboard";
 
   return NextResponse.json({

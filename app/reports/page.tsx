@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
   const data = await getMarketingData();
-  const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports);
+  const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports, data.contentPosts);
   const reportMetrics: ReportMetric[] = [
     { id: "r-1", label: "Task hoàn thành", value: String(summary.doneTasks), change: `${data.tasks.length} task tổng`, tone: "success" },
     { id: "r-2", label: "Content đã đăng", value: String(summary.postedContent), change: `${summary.pendingContent} bài chờ duyệt`, tone: "info" },

@@ -14,5 +14,13 @@ export const publicMarketingSheets = {
   eventSchedule: {
     id: process.env.GOOGLE_PUBLIC_EVENT_SCHEDULE_SHEET_ID ?? "1peepjk9hBojquQDdkKw0KO4kFItUUtpKVxFQBUX8UJc",
     gid: process.env.GOOGLE_PUBLIC_EVENT_SCHEDULE_GID ?? "955495011"
+  },
+  leads: {
+    id: process.env.GOOGLE_PUBLIC_LEADS_SHEET_ID ?? "15UAA5oGkjUwXTWeXokJC_zz9nQ3O-XiqzFNYEZewY70",
+    gid: process.env.GOOGLE_PUBLIC_LEADS_GID ?? "0"
+  },
+  leadConfig: {
+    id: process.env.GOOGLE_PUBLIC_LEAD_CONFIG_SHEET_ID ?? "15UAA5oGkjUwXTWeXokJC_zz9nQ3O-XiqzFNYEZewY70",
+    gid: process.env.GOOGLE_PUBLIC_LEAD_CONFIG_GID ?? "666788840"
   }
 };

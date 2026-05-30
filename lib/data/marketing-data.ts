@@ -243,14 +243,14 @@ function mapEvents(rows: Record<string, string>[]): CampaignEvent[] {
 function mapLeads(rows: Record<string, string>[]): Lead[] {
   return rows.map((row, index) => ({
     id: pick(row, ["id"], `lead-${index + 1}`),
-    name: pick(row, ["name", "customer", "khach_hang"], "Unknown lead"),
-    phone: pick(row, ["phone", "sdt"], ""),
+    name: pick(row, ["name", "customer", "khach_hang", "ho ten"], "Unknown lead"),
+    phone: pick(row, ["phone", "sdt", "so dien thoai"], ""),
     email: pick(row, ["email"], ""),
-    source: pick(row, ["source", "nguon"], ""),
-    need: pick(row, ["need", "nhu_cau"], ""),
-    status: asEnum(pick(row, ["status", "trang_thai"], leadStatuses[0]), leadStatuses, leadStatuses[0]),
-    followDate: pick(row, ["followDate", "follow_date", "follow"], ""),
-    note: pick(row, ["note", "ghi_chu"], "")
+    source: pick(row, ["source", "nguon", "nguon lead"], ""),
+    need: pick(row, ["need", "nhu_cau", "nhu cau", "san pham quan tam"], ""),
+    status: pick(row, ["status", "trang_thai", "trang thai khach hang"], leadStatuses[0]),
+    followDate: pick(row, ["followDate", "follow_date", "follow", "ngay follow-up tiep theo"], ""),
+    note: pick(row, ["note", "ghi_chu", "ghi chu khach hang"], "")
   }));
 }
 
@@ -430,6 +430,20 @@ export async function getEventData() {
 
 export async function getLeadData() {
   const errors: string[] = [];
+  const publicLeads = await readPublicDataset(
+    publicMarketingSheets.leads.id,
+    publicMarketingSheets.leads.gid,
+    mapLeads,
+    errors
+  );
+  if (publicLeads) {
+    return { leads: publicLeads, source: "google-sheet" as const, errors };
+  }
+
+  if (!process.env.GOOGLE_SHEET_ID_MAIN) {
+    return { leads: [], source: "google-sheet" as const, errors: ["No CRM sheet configured"] };
+  }
+
   const leads = await readDataset(
     process.env.GOOGLE_SHEET_ID_MAIN,
     [process.env.GOOGLE_SHEET_RANGE_LEADS ?? "Leads!A:Z", "CRM!A:Z", "leads!A:Z"],
@@ -443,6 +457,10 @@ export async function getLeadData() {
 
 export async function getAdsData() {
   const errors: string[] = [];
+  if (!process.env.GOOGLE_SHEET_ID_MAIN) {
+    return { adsReports: [], source: "google-sheet" as const, errors: ["No Ads sheet configured"] };
+  }
+
   const adsReports = await readDataset(
     process.env.GOOGLE_SHEET_ID_MAIN,
     [process.env.GOOGLE_SHEET_RANGE_ADS ?? "Ads!A:Z", "AdsReports!A:Z", "ads!A:Z"],

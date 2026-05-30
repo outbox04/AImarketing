@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { getKpiSummary } from "@/lib/rules/marketing-rules";
 import type { AdsReport } from "@/types/ads";
-import type { ApprovalItem } from "@/types/content";
+import type { ApprovalItem, ContentPost } from "@/types/content";
 import type { Lead } from "@/types/crm";
 import type { CampaignEvent } from "@/types/event";
 import type { Task } from "@/types/task";
@@ -27,14 +27,15 @@ const toneClass = {
 
 type KpiCardsProps = {
   tasks: Task[];
+  contentPosts: ContentPost[];
   approvalItems: ApprovalItem[];
   campaignEvents: CampaignEvent[];
   leads: Lead[];
   adsReports: AdsReport[];
 };
 
-export function KpiCards({ tasks, approvalItems, campaignEvents, leads, adsReports }: KpiCardsProps) {
-  const kpis = getKpiSummary(tasks, approvalItems, campaignEvents, leads, adsReports);
+export function KpiCards({ tasks, contentPosts, approvalItems, campaignEvents, leads, adsReports }: KpiCardsProps) {
+  const kpis = getKpiSummary(tasks, approvalItems, campaignEvents, leads, adsReports, contentPosts);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">

@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const data = await getMarketingData();
-  const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports);
+  const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports, data.contentPosts);
 
   return NextResponse.json({
     summary,
-    kpis: getKpiSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports),
+    kpis: getKpiSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports, data.contentPosts),
     todayTimeline: getTodayTasks(data.tasks),
     source: data.source,
     errors: data.errors
