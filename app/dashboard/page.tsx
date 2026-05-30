@@ -13,13 +13,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
-      <MorningDigest tasks={data.tasks} approvalItems={data.approvalItems} campaignEvents={data.campaignEvents} leads={data.leads} adsReports={data.adsReports} />
+      <MorningDigest tasks={data.tasks} contentPosts={data.contentPosts} approvalItems={data.approvalItems} campaignEvents={data.campaignEvents} leads={data.leads} adsReports={data.adsReports} />
       <KpiCards tasks={data.tasks} contentPosts={data.contentPosts} approvalItems={data.approvalItems} campaignEvents={data.campaignEvents} leads={data.leads} adsReports={data.adsReports} />
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.8fr]">
         <ApprovalPreview approvalItems={data.approvalItems} />
         <div className="space-y-6">
           <TodayTimeline tasks={data.tasks} />
-          <CampaignRadar campaignEvents={data.campaignEvents} />
+          <CampaignRadar campaignEvents={data.campaignEvents} adsReports={data.adsReports} />
           <AiInsightCard />
         </div>
       </div>
