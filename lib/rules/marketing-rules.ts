@@ -101,6 +101,10 @@ export function getRunningEvents(events: CampaignEvent[]) {
   return events.filter((event) => event.approvalStatus !== "Draft" && event.progress < 100);
 }
 
+export function getRunningAds(adsReports: AdsReport[]) {
+  return adsReports.filter((report) => report.status === "Running" || report.status === "Learning").length;
+}
+
 export function getRiskFlags(tasks: Task[], contents: ApprovalItem[], events: CampaignEvent[], adsReports: AdsReport[]) {
   const flags: string[] = [];
   const blockedTasks = tasks.filter((task) => Boolean(task.blocker) && incompleteStatuses.includes(task.status));
@@ -136,7 +140,7 @@ export function getWorkloadSummary(
     pendingImages: getPendingByType(contents, "IMAGE").length,
     pendingWebsite: getPendingByType(contents, "WEBSITE").length,
     pendingVideos: getPendingByType(contents, "VIDEO").length,
-    runningEvents: getRunningEvents(events).length,
+    runningEvents: getRunningEvents(events).length + getRunningAds(adsReports),
     newLeads: leads.filter((lead) => {
       const status = normalizeText(lead.status);
       return status.includes("lead") || status === "moi" || status.includes("mới");

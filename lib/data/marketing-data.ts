@@ -103,6 +103,16 @@ function mapApprovalStatus(value: string): ApprovalStatus {
   return "DRAFT";
 }
 
+function mapAdsStatus(value: string): AdsReport["status"] {
+  const normalized = normalizeText(value);
+  if (normalized.includes("DANG_CHAY") || normalized.includes("RUNNING")) return "Running";
+  if (normalized.includes("TAM_DUNG") || normalized.includes("PAUSED")) return "Paused";
+  if (normalized.includes("DANG_LEN_KE_HOACH") || normalized.includes("PLAN")) return "Planning";
+  if (normalized.includes("HOAN_THANH") || normalized.includes("COMPLETED")) return "Completed";
+  if (normalized.includes("LEARNING")) return "Learning";
+  return "Running";
+}
+
 function mapScheduleRows(rows: Record<string, string>[], kind: "content" | "video" | "event"): ContentPost[] {
   return rows.map((row, index) => {
     const id = pick(row, ["id content", "id video", "id event", "id"], `${kind}-${index + 1}`);
@@ -257,15 +267,15 @@ function mapLeads(rows: Record<string, string>[]): Lead[] {
 function mapAds(rows: Record<string, string>[]): AdsReport[] {
   return rows.map((row, index) => ({
     id: pick(row, ["id"], `ads-${index + 1}`),
-    campaignName: pick(row, ["campaignName", "campaign_name", "campaign"], "Untitled campaign"),
-    platform: asEnum(pick(row, ["platform", "nen_tang"], "Facebook"), ["Facebook", "Google", "TikTok", "LinkedIn"], "Facebook"),
+    campaignName: pick(row, ["campaignName", "campaign_name", "campaign", "ten campaign"], "Untitled campaign"),
+    platform: asEnum(pick(row, ["platform", "nen_tang", "nen tang"], "Facebook"), ["Facebook", "Google", "TikTok", "LinkedIn"], "Facebook"),
     budget: asNumber(pick(row, ["budget", "ngan_sach"], "0")),
     spend: asNumber(pick(row, ["spend", "chi_phi"], "0")),
     leads: asNumber(pick(row, ["leads", "lead"], "0")),
     cpl: asNumber(pick(row, ["cpl"], "0")),
     ctr: pick(row, ["ctr"], "0%"),
-    status: asEnum(pick(row, ["status", "trang_thai"], "Running"), ["Running", "Paused", "Learning", "Completed"], "Running"),
-    reportLink: pick(row, ["reportLink", "report_link", "link"], "/api/reports")
+    status: mapAdsStatus(pick(row, ["status", "trang_thai", "trang thai campaign"], "Running")),
+    reportLink: pick(row, ["reportLink", "report_link", "link", "link bao cao"], "/api/reports")
   }));
 }
 
@@ -457,19 +467,32 @@ export async function getLeadData() {
 
 export async function getAdsData() {
   const errors: string[] = [];
+  const publicAds = await readPublicDataset(
+    publicMarketingSheets.ads.id,
+    publicMarketingSheets.ads.gid,
+    mapAds,
+    errors
+  );
+  if (publicAds) {
+    return { adsReports: publicAds, source: "google-sheet" as const, errors };
+  }
+
   if (!process.env.GOOGLE_SHEET_ID_MAIN) {
     return { adsReports: [], source: "google-sheet" as const, errors: ["No Ads sheet configured"] };
   }
 
-  const adsReports = await readDataset(
+  const result = await readFirstAvailableSheet(
     process.env.GOOGLE_SHEET_ID_MAIN,
-    [process.env.GOOGLE_SHEET_RANGE_ADS ?? "Ads!A:Z", "AdsReports!A:Z", "ads!A:Z"],
-    mapAds,
-    mockAdsReports,
-    errors
+    [process.env.GOOGLE_SHEET_RANGE_ADS ?? "Ads!A:Z", "AdsReports!A:Z", "ads!A:Z"]
   );
+  if (!result.ok || result.rows.length === 0) {
+    if (result.message) errors.push(result.message);
+    return { adsReports: [], source: "google-sheet" as const, errors };
+  }
 
-  return { adsReports, source: adsReports === mockAdsReports ? "mock" as const : "google-sheet" as const, errors };
+  const adsReports = mapAds(result.rows);
+
+  return { adsReports, source: "google-sheet" as const, errors };
 }
 
 export async function getMarketingData(): Promise<MarketingData> {

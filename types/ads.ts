@@ -7,6 +7,6 @@ export type AdsReport = {
   leads: number;
   cpl: number;
   ctr: string;
-  status: "Running" | "Paused" | "Learning" | "Completed";
+  status: "Running" | "Paused" | "Learning" | "Completed" | "Planning";
   reportLink: string;
 };

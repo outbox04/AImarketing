@@ -22,5 +22,9 @@ export const publicMarketingSheets = {
   leadConfig: {
     id: process.env.GOOGLE_PUBLIC_LEAD_CONFIG_SHEET_ID ?? "15UAA5oGkjUwXTWeXokJC_zz9nQ3O-XiqzFNYEZewY70",
     gid: process.env.GOOGLE_PUBLIC_LEAD_CONFIG_GID ?? "666788840"
+  },
+  ads: {
+    id: process.env.GOOGLE_PUBLIC_ADS_SHEET_ID ?? "1vgCDxo-fRIjFEq5vj_dcJuTVLW43q_hjQDqxLsxa28g",
+    gid: process.env.GOOGLE_PUBLIC_ADS_GID ?? "0"
   }
 };
