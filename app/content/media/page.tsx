@@ -3,6 +3,6 @@ import { modulePageConfigs } from "@/lib/google/page-configs";
 
 export const dynamic = "force-dynamic";
 
-export default function ApprovalPage() {
-  return <GoogleModuleWorkspace {...modulePageConfigs.contentApproval} />;
+export default function ContentMediaPage() {
+  return <GoogleModuleWorkspace {...modulePageConfigs.contentMedia} />;
 }
