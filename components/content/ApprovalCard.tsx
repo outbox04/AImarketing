@@ -1,4 +1,8 @@
+"use client";
+
 import { AlertTriangle, Copy, ExternalLink, FileImage, Pencil, ShieldCheck, Sparkles, ThumbsUp, Wand2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -12,10 +16,32 @@ type ApprovalCardProps = {
 };
 
 export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
+  const router = useRouter();
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   const status = approvalStatusMeta[item.status];
   const priority = priorityMeta[item.priority];
   const canAutoPost = item.status === "APPROVED";
   const ruleNote = item.warnings.length > 0 ? item.warnings.join(" · ") : "Đủ điều kiện xử lý thủ công";
+
+  async function updateApproval(statusValue: "APPROVED" | "REVISION" | "REJECTED") {
+    setPendingAction(statusValue);
+    try {
+      const response = await fetch("/api/approval", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: item.id, status: statusValue })
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null) as { message?: string } | null;
+        throw new Error(result?.message ?? "Không thể cập nhật Google Sheet");
+      }
+
+      router.refresh();
+    } finally {
+      setPendingAction(null);
+    }
+  }
 
   return (
     <Card className={compact ? "p-4" : undefined}>
@@ -63,13 +89,13 @@ export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
             <Button size="sm" variant="secondary">
               <Copy size={16} /> Copy caption
             </Button>
-            <Button size="sm" variant="primary">
+            <Button size="sm" variant="primary" disabled={Boolean(pendingAction)} onClick={() => updateApproval("APPROVED")}>
               <ThumbsUp size={16} /> Duyệt
             </Button>
-            <Button size="sm" variant="secondary">
+            <Button size="sm" variant="secondary" disabled={Boolean(pendingAction)} onClick={() => updateApproval("REVISION")}>
               <Pencil size={16} /> Yêu cầu sửa
             </Button>
-            <Button size="sm" variant="danger">
+            <Button size="sm" variant="danger" disabled={Boolean(pendingAction)} onClick={() => updateApproval("REJECTED")}>
               <X size={16} /> Từ chối
             </Button>
             <Button size="sm" variant="secondary">

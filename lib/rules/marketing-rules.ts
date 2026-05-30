@@ -10,22 +10,53 @@ function normalizeVietnameseDate(value: string) {
   return value.toLowerCase();
 }
 
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function parseVietnameseDateTime(value: string) {
+  const match = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if (!match) return null;
+
+  const [, day, month, year, hour = "0", minute = "0"] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+}
+
 export function isToday(value: string) {
+  const parsed = parseVietnameseDateTime(value);
+  if (parsed) {
+    return startOfDay(parsed).getTime() === startOfDay(new Date()).getTime();
+  }
+
   const normalized = normalizeVietnameseDate(value);
   return normalized.includes("hom nay") || normalized.includes("hôm nay") || normalized.includes("hă´m nay");
 }
 
 export function isTomorrow(value: string) {
+  const parsed = parseVietnameseDateTime(value);
+  if (parsed) {
+    const tomorrow = startOfDay(new Date());
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return startOfDay(parsed).getTime() === tomorrow.getTime();
+  }
+
   const normalized = normalizeVietnameseDate(value);
   return normalized.includes("ngay mai") || normalized.includes("ngày mai") || normalized.includes("ngă y mai");
 }
 
 export function isPastDeadline(task: Task) {
-  return task.priority === "URGENT" && task.status !== "DONE" && !isToday(task.deadline) && !isTomorrow(task.deadline);
+  if (task.status === "DONE") return false;
+
+  const parsed = parseVietnameseDateTime(task.deadline);
+  if (parsed) {
+    return parsed.getTime() < Date.now();
+  }
+
+  return task.priority === "URGENT" && !isToday(task.deadline) && !isTomorrow(task.deadline);
 }
 
 export function getTodayTasks(tasks: Task[]) {
-  return tasks.filter((task) => isToday(task.deadline) && task.status !== "DONE");
+  return tasks.filter((task) => (isToday(task.deadline) || Boolean(task.startDate && isToday(task.startDate))) && task.status !== "DONE");
 }
 
 export function getOverdueTasks(tasks: Task[]) {
@@ -49,7 +80,12 @@ export function getPendingByType<T extends ContentPost | ApprovalItem>(contents:
 }
 
 export function getScheduledSoon<T extends ContentPost | ApprovalItem>(contents: T[]) {
-  return contents.filter((item) => item.status === "SCHEDULED" || item.status === "APPROVED");
+  return contents.filter((item) => {
+    if (item.status === "SCHEDULED" || item.status === "APPROVED") return true;
+
+    const scheduledAt = parseVietnameseDateTime(item.scheduledAt);
+    return Boolean(scheduledAt && scheduledAt.getTime() >= Date.now());
+  });
 }
 
 export function getRunningEvents(events: CampaignEvent[]) {

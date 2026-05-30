@@ -1,4 +1,5 @@
-import { readFirstAvailableSheet } from "@/lib/google-sheet";
+import { readFirstAvailableSheet, readPublicCsvSheet } from "@/lib/google-sheet";
+import { publicMarketingSheets } from "@/lib/google-sheet-config";
 import { adsReports as mockAdsReports, approvalItems as mockApprovalItems, campaignEvents as mockCampaignEvents, contentPosts as mockContentPosts, leads as mockLeads, tasks as mockTasks } from "@/lib/mock-data";
 import type { AdsReport } from "@/types/ads";
 import type { ApprovalItem, ApprovalStatus, Channel, ContentPost, ContentType } from "@/types/content";
@@ -26,12 +27,135 @@ const leadStatuses = Array.from(new Set(mockLeads.map((lead) => lead.status))) a
 
 function pick(row: Record<string, string>, keys: string[], fallback = "") {
   for (const key of keys) {
-    const normalized = key.toLowerCase().replace(/\s+/g, "_");
+    const normalized = key
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
     if (row[normalized]) {
       return row[normalized];
     }
   }
   return fallback;
+}
+
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function joinDateTime(date: string, time: string) {
+  return [date, time].filter(Boolean).join(" ").trim();
+}
+
+function mapDeadlinePriority(value: string): Priority {
+  const normalized = normalizeText(value);
+  if (normalized.includes("KHAN_CAP") || normalized.includes("URGENT")) return "URGENT";
+  if (normalized.includes("CAO") || normalized.includes("HIGH")) return "HIGH";
+  if (normalized.includes("THAP") || normalized.includes("LOW")) return "LOW";
+  return "MEDIUM";
+}
+
+function mapDeadlineStatus(value: string): TaskStatus {
+  const normalized = normalizeText(value);
+  if (normalized.includes("HOAN_THANH") || normalized.includes("DA_XONG") || normalized.includes("DONE")) return "DONE";
+  if (normalized.includes("DANG_LAM") || normalized.includes("IN_PROGRESS")) return "IN_PROGRESS";
+  if (normalized.includes("DANG_CHO") || normalized.includes("WAIT")) return "WAITING";
+  if (normalized.includes("MOI") || normalized.includes("INBOX")) return "INBOX";
+  return "TODO";
+}
+
+function mapTaskType(value: string): Task["type"] {
+  const normalized = normalizeText(value);
+  if (normalized.includes("VIDEO")) return "Video";
+  if (normalized.includes("EVENT")) return "Event";
+  if (normalized.includes("QUANG_CAO") || normalized.includes("ADS")) return "Ads";
+  if (normalized.includes("CRM")) return "CRM";
+  if (normalized.includes("SEO") || normalized.includes("WEBSITE")) return "Website";
+  if (normalized.includes("DESIGN") || normalized.includes("THIET_KE")) return "Design";
+  return "Content";
+}
+
+function mapChannel(value: string): Channel {
+  const normalized = normalizeText(value);
+  if (normalized.includes("WEBSITE")) return "Website";
+  if (normalized.includes("VIDEO") || normalized.includes("TIKTOK") || normalized.includes("REELS")) return "Video";
+  if (normalized.includes("EVENT")) return "Event";
+  if (normalized.includes("ADS")) return "Ads";
+  return "Facebook";
+}
+
+function mapApprovalStatus(value: string): ApprovalStatus {
+  const normalized = normalizeText(value);
+  if (normalized.includes("DA_DANG") || normalized.includes("DA_LEN_LICH") || normalized.includes("SCHEDULED")) return "SCHEDULED";
+  if (normalized.includes("CHO_LEN_LICH") || normalized.includes("CHUA_LEN_LICH")) return "PENDING";
+  if (normalized.includes("DUYET") || normalized.includes("APPROVED")) return "APPROVED";
+  if (normalized.includes("TU_CHOI") || normalized.includes("REJECT")) return "REJECTED";
+  return "DRAFT";
+}
+
+function mapScheduleRows(rows: Record<string, string>[], kind: "content" | "video" | "event"): ContentPost[] {
+  return rows.map((row, index) => {
+    const id = pick(row, ["id content", "id video", "id event", "id"], `${kind}-${index + 1}`);
+    const mediaName = pick(row, ["noi dung media", "ten", "title"], "");
+    const channel = mapChannel(pick(row, ["kenh dang", "channel"], kind === "event" ? "Event" : "Facebook"));
+    const type: ContentType = kind === "video" ? "VIDEO" : kind === "event" ? "IMAGE" : "CONTENT";
+
+    return {
+      id: kind === "event" ? `${id}-${index + 1}` : id,
+      title: mediaName || `${kind === "video" ? "Video" : kind === "event" ? "Event media" : "Content"} ${id}`,
+      channel,
+      type,
+      scheduledAt: joinDateTime(pick(row, ["ngay dang"], ""), pick(row, ["gio dang"], "")),
+      status: mapApprovalStatus(pick(row, ["trang thai", "trang thai dang"], "")),
+      campaign: kind === "event" ? id : ""
+    };
+  });
+}
+
+function mapScheduleApprovals(posts: ContentPost[]): ApprovalItem[] {
+  return posts
+    .filter((post) => post.status === "PENDING" || post.status === "DRAFT")
+    .map((post) => ({
+      ...post,
+      caption: "",
+      hashtags: [],
+      driveUrl: "/api/drive",
+      aiScore: 0,
+      aiRiskNote: post.status === "PENDING" ? "Đang chờ hoàn tất trước khi đăng." : "Chưa lên lịch đăng.",
+      priority: "MEDIUM",
+      warnings: post.status === "DRAFT" ? ["Chưa lên lịch"] : []
+    }));
+}
+
+function mapDeadlineApprovals(tasks: Task[]): ApprovalItem[] {
+  return tasks
+    .filter((task) => task.status !== "DONE" && (task.title.toLowerCase().includes("duyệt") || task.title.toLowerCase().includes("duyet")))
+    .map((task) => ({
+      id: `approval-${task.id}`,
+      title: task.title,
+      channel: task.type === "Video" ? "Video" : task.type === "Website" ? "Website" : "Facebook",
+      type: task.type === "Video" ? "VIDEO" : task.type === "Website" ? "WEBSITE" : "CONTENT",
+      scheduledAt: task.deadline,
+      status: "PENDING",
+      campaign: pick({ module_lien_quan: task.type }, ["module lien quan"], task.type),
+      caption: "",
+      hashtags: [],
+      driveUrl: task.fileUrl ?? "/api/drive",
+      aiScore: 0,
+      aiRiskNote: task.blocker ?? "Deadline duyệt đang mở.",
+      priority: task.priority,
+      warnings: task.blocker ? [task.blocker] : []
+    }));
 }
 
 function asEnum<T extends string>(value: string, allowed: readonly T[], fallback: T) {
@@ -55,13 +179,14 @@ function asList(value: string) {
 function mapTasks(rows: Record<string, string>[]): Task[] {
   return rows.map((row, index) => ({
     id: pick(row, ["id"], `task-${index + 1}`),
-    title: pick(row, ["title", "task", "name", "ten_task"], "Untitled task"),
-    type: asEnum(pick(row, ["type", "loai"], "Content"), ["Content", "Design", "Video", "Website", "Event", "Ads", "CRM", "Report"], "Content"),
-    deadline: pick(row, ["deadline", "due", "han", "han_chot"], ""),
-    priority: asEnum(pick(row, ["priority", "muc_do"], "MEDIUM"), priorities, "MEDIUM"),
-    status: asEnum(pick(row, ["status", "trang_thai"], "TODO"), taskStatuses, "TODO"),
+    title: pick(row, ["title", "task", "name", "ten task", "ten deadline"], "Untitled task"),
+    type: mapTaskType(pick(row, ["type", "loai", "module lien quan"], "Content")),
+    startDate: pick(row, ["start", "start date", "ngay bat dau"], undefined as unknown as string),
+    deadline: pick(row, ["deadline", "due", "han", "han chot", "ngay ket thuc"], ""),
+    priority: mapDeadlinePriority(pick(row, ["priority", "muc do", "muc do uu tien"], "MEDIUM")),
+    status: mapDeadlineStatus(pick(row, ["status", "trang thai"], "TODO")),
     fileUrl: pick(row, ["fileUrl", "file_url", "drive", "drive_url"], undefined as unknown as string),
-    blocker: pick(row, ["blocker", "blocked_by", "can_tro"], undefined as unknown as string)
+    blocker: pick(row, ["blocker", "blocked_by", "can_tro", "ghi chu"], undefined as unknown as string)
   }));
 }
 
@@ -156,8 +281,33 @@ async function readDataset<T>(spreadsheetId: string | undefined, ranges: string[
   return mapper(result.rows);
 }
 
+async function readPublicDataset<T>(
+  spreadsheetId: string | undefined,
+  gid: string | undefined,
+  mapper: (rows: Record<string, string>[]) => T[],
+  errors: string[]
+) {
+  const result = await readPublicCsvSheet(spreadsheetId, gid);
+  if (!result.ok || result.rows.length === 0) {
+    if (result.message) errors.push(result.message);
+    return null;
+  }
+
+  return mapper(result.rows);
+}
+
 export async function getTasksData() {
   const errors: string[] = [];
+  const publicTasks = await readPublicDataset(
+    publicMarketingSheets.deadlines.id,
+    publicMarketingSheets.deadlines.gid,
+    mapTasks,
+    errors
+  );
+  if (publicTasks) {
+    return { tasks: publicTasks, source: "google-sheet" as const, errors };
+  }
+
   const tasks = await readDataset(
     process.env.GOOGLE_SHEET_ID_MAIN,
     [process.env.GOOGLE_SHEET_RANGE_TASKS ?? "Tasks!A:Z", "Task!A:Z", "tasks!A:Z"],
@@ -171,6 +321,31 @@ export async function getTasksData() {
 
 export async function getContentData() {
   const errors: string[] = [];
+  const [contentSchedule, videoSchedule, eventSchedule] = await Promise.all([
+    readPublicDataset(
+      publicMarketingSheets.contentSchedule.id,
+      publicMarketingSheets.contentSchedule.gid,
+      (rows) => mapScheduleRows(rows, "content"),
+      errors
+    ),
+    readPublicDataset(
+      publicMarketingSheets.videoSchedule.id,
+      publicMarketingSheets.videoSchedule.gid,
+      (rows) => mapScheduleRows(rows, "video"),
+      errors
+    ),
+    readPublicDataset(
+      publicMarketingSheets.eventSchedule.id,
+      publicMarketingSheets.eventSchedule.gid,
+      (rows) => mapScheduleRows(rows, "event"),
+      errors
+    )
+  ]);
+  const publicPosts = [...(contentSchedule ?? []), ...(videoSchedule ?? []), ...(eventSchedule ?? [])];
+  if (publicPosts.length > 0) {
+    return { contentPosts: publicPosts, source: "google-sheet" as const, errors };
+  }
+
   const contentPosts = await readDataset(
     process.env.GOOGLE_SHEET_ID_CONTENT,
     [process.env.GOOGLE_SHEET_RANGE_CONTENT ?? "Content!A:Z", "Posts!A:Z", "content!A:Z"],
@@ -184,6 +359,12 @@ export async function getContentData() {
 
 export async function getApprovalData() {
   const errors: string[] = [];
+  const [tasksData, contentData] = await Promise.all([getTasksData(), getContentData()]);
+  if (tasksData.source === "google-sheet" || contentData.source === "google-sheet") {
+    const approvalItems = [...mapDeadlineApprovals(tasksData.tasks), ...mapScheduleApprovals(contentData.contentPosts)];
+    return { approvalItems, source: "google-sheet" as const, errors: [...errors, ...tasksData.errors, ...contentData.errors] };
+  }
+
   const contentPosts = await readDataset(
     process.env.GOOGLE_SHEET_ID_CONTENT,
     [process.env.GOOGLE_SHEET_RANGE_CONTENT ?? "Content!A:Z", "Posts!A:Z", "content!A:Z"],
@@ -204,6 +385,38 @@ export async function getApprovalData() {
 
 export async function getEventData() {
   const errors: string[] = [];
+  const eventPosts = await readPublicDataset(
+    publicMarketingSheets.eventSchedule.id,
+    publicMarketingSheets.eventSchedule.gid,
+    (rows) => mapScheduleRows(rows, "event"),
+    errors
+  );
+  if (eventPosts && eventPosts.length > 0) {
+    const grouped = new Map<string, ContentPost[]>();
+    eventPosts.forEach((post) => {
+      const key = post.campaign || post.id;
+      grouped.set(key, [...(grouped.get(key) ?? []), post]);
+    });
+    const campaignEvents = Array.from(grouped.entries()).map(([id, posts]) => {
+      const done = posts.filter((post) => post.status === "SCHEDULED" || post.status === "APPROVED").length;
+      const missing = posts.filter((post) => post.status === "DRAFT" || post.status === "PENDING").map((post) => post.title);
+
+      return {
+        id,
+        name: id,
+        goal: `${posts.length} nội dung media`,
+        progress: Math.round((done / posts.length) * 100),
+        missingChecklist: missing,
+        risk: missing.length > 0 ? `${missing.length} nội dung chưa sẵn sàng` : "Không có cảnh báo",
+        approvalStatus: missing.length > 0 ? "At risk" as const : "Approved" as const,
+        budget: 0,
+        timeline: posts.map((post) => post.scheduledAt).filter(Boolean).join(", ")
+      };
+    });
+
+    return { campaignEvents, source: "google-sheet" as const, errors };
+  }
+
   const campaignEvents = await readDataset(
     process.env.GOOGLE_SHEET_ID_EVENT,
     [process.env.GOOGLE_SHEET_RANGE_EVENTS ?? "Events!A:Z", "Campaigns!A:Z", "Event!A:Z"],
