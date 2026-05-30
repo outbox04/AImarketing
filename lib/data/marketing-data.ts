@@ -1,5 +1,8 @@
 import { readFirstAvailableSheet, readPublicCsvSheet } from "@/lib/google-sheet";
 import { publicMarketingSheets } from "@/lib/google-sheet-config";
+import { getRows } from "@/lib/google/apps-script-client";
+import { SHEET_MODULES } from "@/lib/google/sheet-modules";
+import type { SheetModule } from "@/lib/google/sheet-modules";
 import { adsReports as mockAdsReports, approvalItems as mockApprovalItems, campaignEvents as mockCampaignEvents, contentPosts as mockContentPosts, leads as mockLeads, tasks as mockTasks } from "@/lib/mock-data";
 import type { AdsReport } from "@/types/ads";
 import type { ApprovalItem, ApprovalStatus, Channel, ContentPost, ContentType } from "@/types/content";
@@ -202,13 +205,15 @@ function mapTasks(rows: Record<string, string>[]): Task[] {
 
 function mapContentPosts(rows: Record<string, string>[]): ContentPost[] {
   return rows.map((row, index) => ({
-    id: pick(row, ["id"], `post-${index + 1}`),
-    title: pick(row, ["title", "name", "tieu_de"], "Untitled content"),
-    channel: asEnum(pick(row, ["channel", "kenh"], "Facebook"), channels, "Facebook"),
-    type: asEnum(pick(row, ["type", "loai"], "CONTENT"), contentTypes, "CONTENT"),
-    scheduledAt: pick(row, ["scheduledAt", "scheduled_at", "schedule", "lich_dang"], ""),
-    status: asEnum(pick(row, ["status", "trang_thai"], "DRAFT"), approvalStatuses, "DRAFT"),
-    campaign: pick(row, ["campaign", "chien_dich"], "")
+    id: pick(row, ["id", "id content", "ma content", "ma bai"], `post-${index + 1}`),
+    title: pick(row, ["title", "name", "tieu_de", "tieu de", "noi dung media", "noi dung", "chu de"], "Untitled content"),
+    channel: mapChannel(pick(row, ["channel", "kenh", "kenh dang", "nen tang"], "Facebook")),
+    type: asEnum(pick(row, ["type", "loai", "loai noi dung"], "CONTENT"), contentTypes, "CONTENT"),
+    scheduledAt:
+      joinDateTime(pick(row, ["ngay dang", "ngay_dang", "date", "scheduled date"], ""), pick(row, ["gio dang", "gio_dang", "time"], "")) ||
+      pick(row, ["scheduledAt", "scheduled_at", "schedule", "lich_dang", "lich dang"], ""),
+    status: mapApprovalStatus(pick(row, ["status", "trang_thai", "trang thai", "trang thai dang"], "DRAFT")),
+    campaign: pick(row, ["campaign", "chien_dich", "chien dich"], "")
   }));
 }
 
@@ -306,6 +311,34 @@ async function readPublicDataset<T>(
   return mapper(result.rows);
 }
 
+function stringifyRows(rows: Record<string, unknown>[]) {
+  return rows.map((row) =>
+    Object.entries(row).reduce<Record<string, string>>((record, [key, value]) => {
+      record[key] = value === null || value === undefined ? "" : String(value);
+      return record;
+    }, {})
+  );
+}
+
+async function readAppsScriptDataset<T>(
+  sheetModule: SheetModule,
+  tabs: string[],
+  mapper: (rows: Record<string, string>[]) => T[],
+  errors: string[]
+) {
+  for (const tab of tabs) {
+    try {
+      const result = await getRows(sheetModule, tab);
+      if (result.data.length > 0) {
+        return mapper(stringifyRows(result.data));
+      }
+    } catch (error) {
+      errors.push(`${sheetModule}/${tab}: ${error instanceof Error ? error.message : "Apps Script read failed"}`);
+    }
+  }
+  return null;
+}
+
 export async function getTasksData() {
   const errors: string[] = [];
   const publicTasks = await readPublicDataset(
@@ -331,6 +364,16 @@ export async function getTasksData() {
 
 export async function getContentData() {
   const errors: string[] = [];
+  const appsScriptContent = await readAppsScriptDataset(
+    SHEET_MODULES.CONTENT,
+    ["02_CONTENT", "CONTENT_CALENDAR", "CONTENT"],
+    mapContentPosts,
+    errors
+  );
+  if (appsScriptContent) {
+    return { contentPosts: appsScriptContent, source: "google-sheet" as const, errors };
+  }
+
   const [contentSchedule, videoSchedule, eventSchedule] = await Promise.all([
     readPublicDataset(
       publicMarketingSheets.contentSchedule.id,
