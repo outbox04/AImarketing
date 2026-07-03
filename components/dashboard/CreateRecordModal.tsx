@@ -97,11 +97,23 @@ function createEmptyRow(category: CategoryId) {
 type CreateRecordModalProps = {
   open: boolean;
   onClose: () => void;
+  defaultCategory?: CategoryId;
 };
 
-export function CreateRecordModal({ open, onClose }: CreateRecordModalProps) {
-  const [category, setCategory] = useState<CategoryId>("content_post");
-  const [rows, setRows] = useState<Record<string, string>[]>([createEmptyRow("content_post")]);
+type CreateRecordActionProps = {
+  defaultCategory?: CategoryId;
+  buttonLabel?: string;
+};
+
+export function CreateRecordModal({ open, onClose, defaultCategory }: CreateRecordModalProps) {
+  const [category, setCategory] = useState<CategoryId>(defaultCategory ?? "content_post");
+  const [rows, setRows] = useState<Record<string, string>[]>([createEmptyRow(defaultCategory ?? "content_post")]);
+
+  useEffect(() => {
+    if (defaultCategory) {
+      setCategory(defaultCategory);
+    }
+  }, [defaultCategory]);
   const [status, setStatus] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -215,17 +227,17 @@ export function CreateRecordModal({ open, onClose }: CreateRecordModalProps) {
   );
 }
 
-export function CreateRecordAction() {
+export function CreateRecordAction({ defaultCategory, buttonLabel = "Tạo mới" }: CreateRecordActionProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <div className="flex justify-end">
         <Button variant="primary" onClick={() => setOpen(true)}>
-          <Plus size={16} /> Tạo mới
+          <Plus size={16} /> {buttonLabel}
         </Button>
       </div>
-      <CreateRecordModal open={open} onClose={() => setOpen(false)} />
+      <CreateRecordModal open={open} onClose={() => setOpen(false)} defaultCategory={defaultCategory} />
     </>
   );
 }

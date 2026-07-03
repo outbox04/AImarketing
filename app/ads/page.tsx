@@ -1,6 +1,6 @@
 import { Megaphone } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { CreateRecordAction } from "@/components/dashboard/CreateRecordModal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getAdsData } from "@/lib/data/marketing-data";
 import { formatCurrency } from "@/lib/utils";
@@ -16,7 +16,7 @@ export default async function AdsPage() {
         eyebrow="Performance"
         title="Ads Management"
         description="Theo dõi campaign, platform, budget, spend, lead, CPL, CTR và report link để xử lý nhanh điểm bất thường."
-        actions={<Button variant="primary" disabled title="Tạo campaign cần server-side write integration"><Megaphone size={17} /> Tạo campaign</Button>}
+        actions={<CreateRecordAction defaultCategory="ads_report" buttonLabel="Tạo báo cáo Ads" />}
       />
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">

@@ -1,6 +1,6 @@
 import { Users } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { CreateRecordAction } from "@/components/dashboard/CreateRecordModal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getLeadData } from "@/lib/data/marketing-data";
 
@@ -15,7 +15,7 @@ export default async function CrmPage() {
         eyebrow="Customer Data"
         title="CRM / Customer Data"
         description="Pipeline lead mới, đã liên hệ, đang tư vấn, báo giá, chốt deal, chăm sóc lại với ngày follow rõ ràng."
-        actions={<Button variant="primary" disabled title="Thêm lead cần server-side write integration"><Users size={17} /> Thêm lead</Button>}
+        actions={<CreateRecordAction defaultCategory="lead" buttonLabel="Thêm lead" />}
       />
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">
