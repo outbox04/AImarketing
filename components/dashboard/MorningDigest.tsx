@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ownerName } from "@/lib/constants";
 import { getRiskFlags, getWorkloadSummary } from "@/lib/rules/marketing-rules";
+import Greeting from "@/components/dashboard/Greeting";
 import type { AdsReport } from "@/types/ads";
 import type { ApprovalItem, ContentPost } from "@/types/content";
 import type { Lead } from "@/types/crm";
@@ -18,12 +19,6 @@ type MorningDigestProps = {
   adsReports: AdsReport[];
 };
 
-function getGreeting() {
-  const hour = Number(new Intl.DateTimeFormat("vi-VN", { hour: "numeric", hour12: false, timeZone: "Asia/Ho_Chi_Minh" }).format(new Date()));
-  if (hour < 11) return { label: "buổi sáng", badge: "Morning Digest" };
-  if (hour < 18) return { label: "buổi chiều", badge: "Afternoon Digest" };
-  return { label: "buổi tối", badge: "Evening Digest" };
-}
 
 function splitRiskFlag(value: string) {
   const [title, ...rest] = value.split(":");
@@ -33,17 +28,13 @@ function splitRiskFlag(value: string) {
 export function MorningDigest({ tasks, contentPosts, approvalItems, campaignEvents, leads, adsReports }: MorningDigestProps) {
   const summary = getWorkloadSummary(tasks, approvalItems, campaignEvents, leads, adsReports, contentPosts);
   const riskFlags = getRiskFlags(tasks, approvalItems, campaignEvents, adsReports).slice(0, 3);
-  const greeting = getGreeting();
+  
 
   return (
     <section className="overflow-hidden rounded-[28px] border border-indigo-100 bg-gradient-to-br from-white via-[#F8FAFF] to-[#EEF2FF] p-6 shadow-soft md:p-8">
       <div className="grid gap-6 lg:grid-cols-[1.5fr_0.8fr] lg:items-center">
         <div>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-semibold text-primary">
-            <CalendarClock size={16} />
-            {greeting.badge}
-          </div>
-          <h1 className="text-3xl font-bold tracking-normal text-text-main md:text-4xl">Chào {greeting.label}, {ownerName}.</h1>
+          <Greeting ownerName={ownerName} />
           <p className="mt-4 max-w-2xl text-base leading-7 text-text-muted">
             Hôm nay có <strong className="text-text-main">{summary.todayTasks} việc cần xử lý</strong>,{" "}
             <strong className="text-text-main">{summary.pendingContent} nội dung cần duyệt</strong>,{" "}
