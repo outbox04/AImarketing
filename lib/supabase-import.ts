@@ -21,6 +21,10 @@ async function upsertRows<T extends Record<string, unknown>>(table: string, rows
     return { ok: true, count: 0 };
   }
 
+  if (!supabaseAdmin) {
+    return { ok: false, error: "Supabase is not configured", count: rows.length };
+  }
+
   const { error } = await supabaseAdmin.from(table as string).upsert(rows as any[], {
     onConflict: "id"
   });

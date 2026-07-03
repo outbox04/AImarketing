@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase-client";
+import { isSupabaseConfigured, supabaseAdmin } from "@/lib/supabase-client";
 import { adsReports as mockAdsReports, approvalItems as mockApprovalItems, campaignEvents as mockCampaignEvents, contentPosts as mockContentPosts, leads as mockLeads, tasks as mockTasks } from "@/lib/mock-data";
 import type { AdsReport } from "@/types/ads";
 import type { ApprovalItem, ContentPost } from "@/types/content";
@@ -23,10 +23,11 @@ type DataTableResult<T> = {
 };
 
 async function queryTable<T>(table: string, fallback: T[], errors: string[]): Promise<DataTableResult<T>> {
-  const start = Date.now();
+  if (!isSupabaseConfigured || !supabaseAdmin) {
+    return { rows: fallback, source: "mock" };
+  }
+
   const { data, error } = await supabaseAdmin.from(table as string).select("*");
-  const dur = Date.now() - start;
-  console.log(`[db] select ${table} took ${dur}ms`);
   if (error) {
     errors.push(error.message);
     return { rows: fallback, source: "mock" };
@@ -72,10 +73,8 @@ export async function getAdsData() {
 }
 
 export async function getMarketingData(): Promise<MarketingData> {
-  // short in-memory cache to avoid repeated Supabase calls during rapid page interactions
   const CACHE_TTL = 2000; // ms
   try {
-    // @ts-ignore - module level cache
     if ((global as any).__marketing_cache && Date.now() - (global as any).__marketing_cache.ts < CACHE_TTL) {
       return (global as any).__marketing_cache.data as MarketingData;
     }
@@ -120,7 +119,6 @@ export async function getMarketingData(): Promise<MarketingData> {
   };
 
   try {
-    // @ts-ignore
     (global as any).__marketing_cache = { data: result, ts: Date.now() };
   } catch (e) {
     // ignore

@@ -39,10 +39,11 @@ export async function POST(request: NextRequest) {
     return row;
   });
 
-  const start = Date.now();
+  if (!supabaseAdmin) {
+    return NextResponse.json({ ok: false, message: "Supabase is not configured" }, { status: 503 });
+  }
+
   const { error } = await supabaseAdmin.from(table).insert(formattedRows);
-  const dur = Date.now() - start;
-  console.log(`[api] POST /api/marketing -> ${table} insert took ${dur}ms`);
   if (error) {
     return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
   }

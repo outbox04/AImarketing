@@ -5,10 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase-client";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const start = Date.now();
   const data = await getApprovalData();
-  const dur = Date.now() - start;
-  console.log(`[api] GET /api/approval took ${dur}ms`);
   return NextResponse.json({ approvalItems: data.approvalItems, source: data.source, errors: data.errors });
 }
 
@@ -29,10 +26,11 @@ export async function PATCH(request: NextRequest) {
     updates.aiRiskNote = body.note;
   }
 
-  const start = Date.now();
+  if (!supabaseAdmin) {
+    return NextResponse.json({ ok: false, message: "Supabase is not configured" }, { status: 503 });
+  }
+
   const { error, data } = await supabaseAdmin.from("approval_items").update(updates).eq("id", rawId);
-  const dur = Date.now() - start;
-  console.log(`[api] PATCH /api/approval took ${dur}ms`);
   if (error) {
     return NextResponse.json({ ok: false, message: error.message }, { status: 400 });
   }
