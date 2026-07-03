@@ -12,6 +12,27 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "secondary", size = "md", ...props }, ref) => {
+    const { onClick, ...rest } = props as any;
+
+    const wrappedOnClick = (e: any) => {
+      try {
+        const debug = typeof window !== "undefined" && localStorage.getItem("debugDelay") === "1";
+        const start = debug && typeof performance !== "undefined" ? performance.now() : null;
+        const result = onClick?.(e);
+        if (result && typeof result.then === "function") {
+          return result.then((res: any) => {
+            if (start) console.log("[debug] Button handler duration:", (performance.now() - start).toFixed(1), "ms");
+            return res;
+          });
+        }
+        if (start) console.log("[debug] Button handler duration:", (performance.now() - start).toFixed(1), "ms");
+        return result;
+      } catch (err) {
+        console.error(err);
+        return onClick?.(e);
+      }
+    };
+
     return (
       <button
         ref={ref}
@@ -25,7 +46,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           variant === "ghost" && "text-text-muted hover:bg-surface-soft hover:text-text-main",
           className
         )}
-        {...props}
+        onClick={wrappedOnClick}
+        {...rest}
       />
     );
   }

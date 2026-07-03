@@ -99,6 +99,7 @@ async function callProvider(provider: AiProvider, taskType: AiTaskType, input: u
   }
 
   if (provider === "claude") {
+    const providerStart = Date.now();
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -114,10 +115,14 @@ async function callProvider(provider: AiProvider, taskType: AiTaskType, input: u
     });
 
     if (!response.ok) {
+      const dur = Date.now() - providerStart;
+      console.error(`[ai] claude ${taskType} failed in ${dur}ms, status ${response.status}`);
       throw new Error(`Claude returned ${response.status}`);
     }
 
     const data = await response.json();
+    const dur = Date.now() - providerStart;
+    console.log(`[ai] claude ${taskType} completed in ${dur}ms`);
     const content = data.content?.map((item: { text?: string }) => item.text).filter(Boolean).join("\n") ?? "";
     return {
       content,
@@ -126,6 +131,7 @@ async function callProvider(provider: AiProvider, taskType: AiTaskType, input: u
     };
   }
 
+  const providerStart = Date.now();
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -139,10 +145,14 @@ async function callProvider(provider: AiProvider, taskType: AiTaskType, input: u
   });
 
   if (!response.ok) {
+    const dur = Date.now() - providerStart;
+    console.error(`[ai] openai ${taskType} failed in ${dur}ms, status ${response.status}`);
     throw new Error(`OpenAI returned ${response.status}`);
   }
 
   const data = await response.json();
+  const dur = Date.now() - providerStart;
+  console.log(`[ai] openai ${taskType} completed in ${dur}ms`);
   const content = data.choices?.[0]?.message?.content ?? "";
   return {
     content,
@@ -152,6 +162,7 @@ async function callProvider(provider: AiProvider, taskType: AiTaskType, input: u
 }
 
 export async function runAiTask(request: AiGatewayRequest): Promise<AiGatewayResponse> {
+  const totalStart = Date.now();
   const provider = getProvider(request.provider);
   const hash = getAiHash({ taskType: request.taskType, input: request.input });
   const cacheKey = `${provider}:${request.taskType}:${hash}`;
@@ -185,6 +196,8 @@ export async function runAiTask(request: AiGatewayRequest): Promise<AiGatewayRes
 
   try {
     const result = await callProvider(provider, request.taskType, request.input);
+    const totalDur = Date.now() - totalStart;
+    console.log(`[ai] runAiTask ${request.taskType} total ${totalDur}ms (provider=${provider})`);
     const totalTokens = result.promptTokens + result.completionTokens;
     const response: AiGatewayResponse = {
       ok: true,
@@ -211,6 +224,8 @@ export async function runAiTask(request: AiGatewayRequest): Promise<AiGatewayRes
 
     return response;
   } catch (error) {
+    const totalDur = Date.now() - totalStart;
+    console.error(`[ai] runAiTask ${request.taskType} error after ${totalDur}ms`, error);
     const message = error instanceof Error ? error.message : "Unknown AI error";
     writeAiLog({
       ID: crypto.randomUUID(),

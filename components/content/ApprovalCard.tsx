@@ -18,13 +18,17 @@ type ApprovalCardProps = {
 export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
   const router = useRouter();
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [localStatus, setLocalStatus] = useState(item.status);
   const status = approvalStatusMeta[item.status];
   const priority = priorityMeta[item.priority];
   const canAutoPost = item.status === "APPROVED";
   const ruleNote = item.warnings.length > 0 ? item.warnings.join(" · ") : "Đủ điều kiện xử lý thủ công";
 
   async function updateApproval(statusValue: "APPROVED" | "REVISION" | "REJECTED") {
+    // optimistic update: reflect change in UI immediately
     setPendingAction(statusValue);
+    const prevStatus = localStatus;
+    setLocalStatus(statusValue);
     try {
       const response = await fetch("/api/approval", {
         method: "PATCH",
@@ -40,6 +44,8 @@ export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
       setPendingAction(null);
     } catch (error) {
       console.error(error);
+      // revert optimistic update
+      setLocalStatus(prevStatus);
       setPendingAction(null);
     }
   }
@@ -50,7 +56,7 @@ export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
         <MediaPreview src={item.mediaSrc} alt={item.title} />
         <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <Badge className={status.className}>{status.label}</Badge>
+            <Badge className={approvalStatusMeta[localStatus].className}>{approvalStatusMeta[localStatus].label}</Badge>
             <Badge className={priority.className}>{priority.label}</Badge>
             <Badge className={canAutoPost ? "border-green-200 bg-success-soft text-green-700" : "border-border bg-surface-soft text-text-muted"}>
               Auto post: {canAutoPost ? "Sẵn sàng" : "Chưa đủ điều kiện"}

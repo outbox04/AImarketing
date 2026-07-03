@@ -23,7 +23,10 @@ type DataTableResult<T> = {
 };
 
 async function queryTable<T>(table: string, fallback: T[], errors: string[]): Promise<DataTableResult<T>> {
+  const start = Date.now();
   const { data, error } = await supabaseAdmin.from(table as string).select("*");
+  const dur = Date.now() - start;
+  console.log(`[db] select ${table} took ${dur}ms`);
   if (error) {
     errors.push(error.message);
     return { rows: fallback, source: "mock" };
@@ -69,6 +72,16 @@ export async function getAdsData() {
 }
 
 export async function getMarketingData(): Promise<MarketingData> {
+  // short in-memory cache to avoid repeated Supabase calls during rapid page interactions
+  const CACHE_TTL = 2000; // ms
+  try {
+    // @ts-ignore - module level cache
+    if ((global as any).__marketing_cache && Date.now() - (global as any).__marketing_cache.ts < CACHE_TTL) {
+      return (global as any).__marketing_cache.data as MarketingData;
+    }
+  } catch (e) {
+    // ignore
+  }
   const [tasksData, contentData, approvalData, eventData, leadData, adsData] = await Promise.all([
     getTasksData(),
     getContentData(),
@@ -95,7 +108,7 @@ export async function getMarketingData(): Promise<MarketingData> {
     leadData.source === "mock" &&
     adsData.source === "mock";
 
-  return {
+  const result: MarketingData = {
     tasks: tasksData.tasks,
     contentPosts: contentData.contentPosts,
     approvalItems: approvalData.approvalItems,
@@ -105,4 +118,13 @@ export async function getMarketingData(): Promise<MarketingData> {
     source: allMock ? "mock" : "supabase",
     errors
   };
+
+  try {
+    // @ts-ignore
+    (global as any).__marketing_cache = { data: result, ts: Date.now() };
+  } catch (e) {
+    // ignore
+  }
+
+  return result;
 }
