@@ -7,7 +7,7 @@ import { MorningDigest } from "@/components/dashboard/MorningDigest";
 import { TodayTimeline } from "@/components/dashboard/TodayTimeline";
 import { getMarketingData } from "@/lib/data/marketing-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function DashboardPage() {
   const data = await getMarketingData();

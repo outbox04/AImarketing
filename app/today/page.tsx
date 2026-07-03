@@ -4,7 +4,7 @@ import { ApprovalPreview } from "@/components/dashboard/ApprovalPreview";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getMarketingData } from "@/lib/data/marketing-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function TodayPage() {
   const data = await getMarketingData();

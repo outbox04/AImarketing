@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getContentData } from "@/lib/data/marketing-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function AutoPostingPage() {
   const data = await getContentData();

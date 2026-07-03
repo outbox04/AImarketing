@@ -7,7 +7,7 @@ import { getMarketingData } from "@/lib/data/marketing-data";
 import { getWorkloadSummary } from "@/lib/rules/marketing-rules";
 import type { ReportMetric } from "@/types/report";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function ReportsPage() {
   const data = await getMarketingData();

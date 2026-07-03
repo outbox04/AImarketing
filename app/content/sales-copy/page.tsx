@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
 import { getApprovalData } from "@/lib/data/marketing-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function SalesCopyPage() {
   const data = await getApprovalData();

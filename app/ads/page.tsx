@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { getAdsData } from "@/lib/data/marketing-data";
 import { formatCurrency } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function AdsPage() {
   const data = await getAdsData();

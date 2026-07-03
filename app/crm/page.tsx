@@ -4,7 +4,7 @@ import { CreateRecordAction } from "@/components/dashboard/CreateRecordModal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getLeadData } from "@/lib/data/marketing-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function CrmPage() {
   const data = await getLeadData();

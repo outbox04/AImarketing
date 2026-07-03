@@ -7,7 +7,7 @@ import { getApprovalData } from "@/lib/data/marketing-data";
 
 const tabs = ["Tất cả", "Content", "Hình ảnh", "Video", "Website", "Cần duyệt hôm nay", "Cần sửa", "Đã duyệt"];
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function ApprovalPage() {
   const data = await getApprovalData();

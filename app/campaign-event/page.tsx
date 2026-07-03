@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { getEventData } from "@/lib/data/marketing-data";
 import { formatCurrency } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 export default async function CampaignEventPage() {
   const data = await getEventData();
