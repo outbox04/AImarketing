@@ -1,0 +1,2 @@
+id,title,type,start_date,deadline,priority,status,file_url,blocker
+"task-design-1","Thiết kế banner workshop AI","Design",,"2026-07-10","HIGH","TODO","/api/drive","Chờ yêu cầu kích thước"

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getContentData } from "@/lib/data/marketing-data";
-import { updateScheduleSheet } from "@/lib/sheet-write";
+import { supabaseAdmin } from "@/lib/supabase-client";
 
 export const dynamic = "force-dynamic";
 
@@ -10,12 +10,16 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const body = await request.json() as { id?: string; updates?: Parameters<typeof updateScheduleSheet>[1] };
+  const body = await request.json() as { id?: string; updates?: Record<string, unknown> };
 
   if (!body.id || !body.updates) {
     return NextResponse.json({ ok: false, message: "Missing id or updates" }, { status: 400 });
   }
 
-  const result = await updateScheduleSheet(body.id, body.updates);
-  return NextResponse.json(result, { status: result.ok ? 200 : 400 });
+  const { error, data } = await supabaseAdmin.from("content_posts").update(body.updates).eq("id", body.id);
+  if (error) {
+    return NextResponse.json({ ok: false, message: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json({ ok: true, data }, { status: 200 });
 }

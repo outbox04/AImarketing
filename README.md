@@ -15,10 +15,10 @@ Mở `http://localhost:3000/dashboard`.
 
 Copy `.env.local.example` thành `.env.local` và điền secret thật khi tích hợp backend. Không commit `.env.local`.
 
-Frontend không gọi Google/OpenAI/Telegram/Facebook trực tiếp. Luồng đúng:
+Frontend không gọi Google/OpenAI/Telegram/Facebook trực tiếp. Sheet-specific integration has been removed. Luồng dữ liệu chính:
 
 ```text
-Frontend -> /api/* -> Google Sheet / Drive / Calendar / Telegram / OpenAI / Claude / Facebook
+Frontend -> /api/* -> Supabase / Drive / Calendar / Telegram / OpenAI / Claude / Facebook
 ```
 
 ## Deploy Vercel

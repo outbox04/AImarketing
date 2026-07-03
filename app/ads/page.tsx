@@ -16,7 +16,7 @@ export default async function AdsPage() {
         eyebrow="Performance"
         title="Ads Management"
         description="Theo dõi campaign, platform, budget, spend, lead, CPL, CTR và report link để xử lý nhanh điểm bất thường."
-        actions={<Button variant="primary" disabled title="Tạo campaign cần Google Sheets write integration"><Megaphone size={17} /> Tạo campaign</Button>}
+        actions={<Button variant="primary" disabled title="Tạo campaign cần server-side write integration"><Megaphone size={17} /> Tạo campaign</Button>}
       />
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">

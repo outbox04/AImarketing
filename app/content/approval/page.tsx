@@ -26,7 +26,7 @@ export default async function ApprovalPage() {
               <option>CRM Growth Q2</option>
             </Select>
             <Button variant="secondary"><Filter size={17} /> Bộ lọc</Button>
-            <Button variant="primary" disabled title="Duyệt nhanh cần Google Sheets write integration"><ShieldCheck size={17} /> Duyệt nhanh</Button>
+            <Button variant="primary" disabled title="Duyệt nhanh cần server-side write integration"><ShieldCheck size={17} /> Duyệt nhanh</Button>
           </>
         }
       />

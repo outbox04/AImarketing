@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApprovalData } from "@/lib/data/marketing-data";
-import { updateDeadlineSheet, updateScheduleSheet } from "@/lib/sheet-write";
+import { supabaseAdmin } from "@/lib/supabase-client";
 
 export const dynamic = "force-dynamic";
 
@@ -21,12 +21,15 @@ export async function PATCH(request: NextRequest) {
   }
 
   const rawId = body.id.startsWith("approval-") ? body.id.replace(/^approval-/, "") : body.id;
-  const result = rawId.startsWith("DL_")
-    ? await updateDeadlineSheet(rawId, {
-        status: body.status === "APPROVED" || body.status === "SCHEDULED" ? "DONE" : body.status === "REVISION" ? "IN_PROGRESS" : "WAITING",
-        note: body.note
-      })
-    : await updateScheduleSheet(rawId, { status: body.status, note: body.note });
+  const updates: Record<string, unknown> = { status: body.status };
+  if (body.note) {
+    updates.aiRiskNote = body.note;
+  }
 
-  return NextResponse.json(result, { status: result.ok ? 200 : 400 });
+  const { error, data } = await supabaseAdmin.from("approval_items").update(updates).eq("id", rawId);
+  if (error) {
+    return NextResponse.json({ ok: false, message: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json({ ok: true, data }, { status: 200 });
 }

@@ -74,7 +74,7 @@ export function MorningDigest({ tasks, contentPosts, approvalItems, campaignEven
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-text-main">{risk.title}</p>
-                    <p className="mt-1 text-sm text-text-muted">{risk.note || "Cần kiểm tra tiến độ trong Google Sheet."}</p>
+                    <p className="mt-1 text-sm text-text-muted">{risk.note || "Cần kiểm tra tiến độ trong Supabase."}</p>
                   </div>
                 </div>
               );

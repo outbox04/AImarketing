@@ -34,11 +34,12 @@ export function ApprovalCard({ item, compact = false }: ApprovalCardProps) {
 
       if (!response.ok) {
         const result = await response.json().catch(() => null) as { message?: string } | null;
-        throw new Error(result?.message ?? "Không thể cập nhật Google Sheet");
+        throw new Error(result?.message ?? "Không thể cập nhật dữ liệu Supabase");
       }
 
-      router.refresh();
-    } finally {
+      setPendingAction(null);
+    } catch (error) {
+      console.error(error);
       setPendingAction(null);
     }
   }

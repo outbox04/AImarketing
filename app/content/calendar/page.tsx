@@ -20,7 +20,7 @@ export default async function ContentCalendarPage() {
           <>
             <Select><option>Tuần</option><option>Ngày</option><option>Tháng</option><option>Quý</option></Select>
             <Button variant="secondary"><Filter size={17} /> Channel/status</Button>
-            <Button variant="primary" disabled title="Thêm lịch đăng cần Google Sheets write integration"><CalendarDays size={17} /> Thêm lịch đăng</Button>
+            <Button variant="primary" disabled title="Thêm lịch đăng cần server-side write integration"><CalendarDays size={17} /> Thêm lịch đăng</Button>
           </>
         }
       />

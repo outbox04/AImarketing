@@ -15,7 +15,7 @@ export default async function CrmPage() {
         eyebrow="Customer Data"
         title="CRM / Customer Data"
         description="Pipeline lead mới, đã liên hệ, đang tư vấn, báo giá, chốt deal, chăm sóc lại với ngày follow rõ ràng."
-        actions={<Button variant="primary" disabled title="Thêm lead cần Google Sheets write integration"><Users size={17} /> Thêm lead</Button>}
+        actions={<Button variant="primary" disabled title="Thêm lead cần server-side write integration"><Users size={17} /> Thêm lead</Button>}
       />
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">

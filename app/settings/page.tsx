@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { maskSecret } from "@/lib/utils";
 
 const settings = [
-  "Google Sheet ID", "Google Drive Folder ID", "Google Calendar ID", "Telegram Bot báo cáo",
+  "Supabase URL", "Supabase Service Role Key", "Google Drive Folder ID", "Google Calendar ID", "Telegram Bot báo cáo",
   "Telegram Bot nhập liệu", "OpenAI API", "Claude API", "Facebook Page ID", "Facebook Access Token"
 ];
 

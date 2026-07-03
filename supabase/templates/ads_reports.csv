@@ -1,0 +1,2 @@
+id,campaign_name,platform,budget,spend,leads,cpl,ctr,status,report_link
+"ads-1","AI Workshop Lead Gen","Facebook",30000000,18200000,146,124657,"2.8%","Running","/api/reports"
