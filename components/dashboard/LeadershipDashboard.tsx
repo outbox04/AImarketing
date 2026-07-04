@@ -26,22 +26,22 @@ export function LeadershipDashboard({ data }: { data: MarketingData }) {
     },
     {
       name: "Sale",
-      completed: data.leads.filter((lead) => lead.status.toLowerCase().includes("bao") || lead.status.toLowerCase().includes("deal")).length,
-      pending: data.leads.filter((lead) => lead.status.toLowerCase().includes("lead") || lead.status.toLowerCase().includes("tu")).length,
-      quality: data.leads.length ? Math.round((data.leads.length - overdueTasks) / data.leads.length * 100) : 0
+      completed: data.leads.filter((lead) => lead.status.toLowerCase().includes("báo") || lead.status.toLowerCase().includes("deal")).length,
+      pending: data.leads.filter((lead) => lead.status.toLowerCase().includes("lead") || lead.status.toLowerCase().includes("tư")).length,
+      quality: data.leads.length ? Math.round(((data.leads.length - overdueTasks) / data.leads.length) * 100) : 0
     }
   ];
 
   const timelineData = [
-    { name: "Ngay", tasks: getTodayTasks(data.tasks).length, leads: data.leads.length, content: data.contentPosts.length },
-    { name: "Thang", tasks: totalTasks, leads: data.leads.length * 8, content: data.contentPosts.length * 6 },
-    { name: "Quy", tasks: totalTasks * 3, leads: data.leads.length * 24, content: data.contentPosts.length * 18 }
+    { name: "Ngày", tasks: getTodayTasks(data.tasks).length, leads: data.leads.length, content: data.contentPosts.length },
+    { name: "Tháng", tasks: totalTasks, leads: data.leads.length * 8, content: data.contentPosts.length * 6 },
+    { name: "Quý", tasks: totalTasks * 3, leads: data.leads.length * 24, content: data.contentPosts.length * 18 }
   ];
 
   const completionData = [
-    { name: "Hoan thanh", value: doneTasks },
-    { name: "Dang xu ly", value: Math.max(totalTasks - doneTasks - overdueTasks, 0) },
-    { name: "Tre han", value: overdueTasks }
+    { name: "Hoàn thành", value: doneTasks },
+    { name: "Đang xử lý", value: Math.max(totalTasks - doneTasks - overdueTasks, 0) },
+    { name: "Trễ hạn", value: overdueTasks }
   ];
 
   const employeeData = [
@@ -53,17 +53,16 @@ export function LeadershipDashboard({ data }: { data: MarketingData }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="p-4"><p className="text-sm font-semibold text-text-muted">Hoan thanh cong viec</p><p className="mt-2 text-3xl font-bold">{completionRate(doneTasks, totalTasks)}%</p></Card>
-        <Card className="p-4"><p className="text-sm font-semibold text-text-muted">Can duyet</p><p className="mt-2 text-3xl font-bold">{pendingApproval}</p></Card>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="p-4"><p className="text-sm font-semibold text-text-muted">Nội dung chờ duyệt</p><p className="mt-2 text-3xl font-bold">{pendingApproval}</p></Card>
         <Card className="p-4"><p className="text-sm font-semibold text-text-muted">Lead trong pipeline</p><p className="mt-2 text-3xl font-bold">{data.leads.length}</p></Card>
-        <Card className="p-4"><p className="text-sm font-semibold text-text-muted">Campaign/Ads dang chay</p><p className="mt-2 text-3xl font-bold">{data.campaignEvents.length + data.adsReports.length}</p></Card>
+        <Card className="p-4"><p className="text-sm font-semibold text-text-muted">Campaign/Ads đang chạy</p><p className="mt-2 text-3xl font-bold">{data.campaignEvents.length + data.adsReports.length}</p></Card>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_0.75fr]">
         <Card>
-          <h2 className="text-lg font-bold text-text-main">Tong quan ngay, thang, quy</h2>
-          <p className="mt-1 text-sm text-text-muted">Bieu do cot so sanh khoi luong task, lead va content theo chu ky.</p>
+          <h2 className="text-lg font-bold text-text-main">Tổng quan ngày, tháng, quý</h2>
+          <p className="mt-1 text-sm text-text-muted">Biểu đồ cột so sánh khối lượng task, lead và content theo chu kỳ.</p>
           <div className="mt-5 h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={timelineData}>
@@ -80,8 +79,8 @@ export function LeadershipDashboard({ data }: { data: MarketingData }) {
         </Card>
 
         <Card>
-          <h2 className="text-lg font-bold text-text-main">Trang thai hoan thanh</h2>
-          <p className="mt-1 text-sm text-text-muted">Bieu do tron giup nhin nhanh ty le viec da xong, dang xu ly va tre han.</p>
+          <h2 className="text-lg font-bold text-text-main">Trạng thái công việc</h2>
+          <p className="mt-1 text-sm text-text-muted">Biểu đồ tròn thể hiện tỷ lệ việc đã xong, đang xử lý và trễ hạn.</p>
           <div className="mt-5 h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -99,8 +98,8 @@ export function LeadershipDashboard({ data }: { data: MarketingData }) {
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card>
-          <h2 className="text-lg font-bold text-text-main">Chat luong theo phong ban</h2>
-          <p className="mt-1 text-sm text-text-muted">So sanh viec hoan thanh, ton dong va diem chat luong tong hop.</p>
+          <h2 className="text-lg font-bold text-text-main">Chất lượng theo phòng ban</h2>
+          <p className="mt-1 text-sm text-text-muted">So sánh việc hoàn thành, tồn đọng và điểm chất lượng tổng hợp.</p>
           <div className="mt-5 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={departmentData}>
@@ -117,8 +116,8 @@ export function LeadershipDashboard({ data }: { data: MarketingData }) {
         </Card>
 
         <Card>
-          <h2 className="text-lg font-bold text-text-main">Diem hieu suat ca nhan/nhom</h2>
-          <p className="mt-1 text-sm text-text-muted">Bieu do duong de nhan ra nhom can ho tro them.</p>
+          <h2 className="text-lg font-bold text-text-main">Điểm hiệu suất cá nhân/nhóm</h2>
+          <p className="mt-1 text-sm text-text-muted">Biểu đồ đường giúp nhận ra nhóm cần hỗ trợ thêm.</p>
           <div className="mt-5 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={employeeData}>

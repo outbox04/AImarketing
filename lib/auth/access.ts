@@ -19,7 +19,7 @@ const contentTypesByPermission: Partial<Record<WorkPermission, ContentType[]>> =
   WEBSITE: ["WEBSITE"]
 };
 
-const sharedStaffRoutes = ["/dashboard", "/today", "/tasks", "/ai-assistant", "/settings"];
+const sharedStaffRoutes = ["/dashboard", "/today", "/tasks"];
 
 const routesByPermission: Record<WorkPermission, string[]> = {
   DIGITAL: ["/ads", "/campaign-event"],
@@ -88,7 +88,7 @@ export function permissionLabel(permission: WorkPermission) {
     DIGITAL: "Digital/Campaign",
     CONTENT: "Content",
     VIDEO: "Video",
-    IMAGE: "Hinh anh/Design",
+    IMAGE: "Hình ảnh/Design",
     WEBSITE: "Website/SEO",
     CRM: "CRM/Sale"
   };

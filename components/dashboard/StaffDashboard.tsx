@@ -13,8 +13,8 @@ export function StaffDashboard({ data, user }: { data: MarketingData; user: Empl
   return (
     <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
       <Card>
-        <h2 className="text-lg font-bold text-text-main">Pham vi cong viec cua toi</h2>
-        <p className="mt-1 text-sm text-text-muted">Dashboard chi hien thi du lieu va module tuong ung voi quyen duoc gan.</p>
+        <h2 className="text-lg font-bold text-text-main">Phạm vi công việc của tôi</h2>
+        <p className="mt-1 text-sm text-text-muted">Dashboard chỉ hiển thị dữ liệu và module tương ứng với quyền được gán.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {user.permissions.map((permission) => (
             <Badge key={permission} className="border-primary-soft bg-primary-soft text-primary">
@@ -26,15 +26,15 @@ export function StaffDashboard({ data, user }: { data: MarketingData; user: Empl
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="p-4">
-          <p className="text-sm font-semibold text-text-muted">Viec duoc giao</p>
+          <p className="text-sm font-semibold text-text-muted">Việc được giao</p>
           <p className="mt-2 text-3xl font-bold text-text-main">{data.tasks.length}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm font-semibold text-text-muted">Da hoan thanh</p>
+          <p className="text-sm font-semibold text-text-muted">Đã hoàn thành</p>
           <p className="mt-2 text-3xl font-bold text-success">{doneTasks}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm font-semibold text-text-muted">Can chu y</p>
+          <p className="text-sm font-semibold text-text-muted">Cần chú ý</p>
           <p className="mt-2 text-3xl font-bold text-warning">{overdueTasks + pendingContent}</p>
         </Card>
       </div>

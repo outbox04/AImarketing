@@ -3,9 +3,9 @@ import type { Department, EmployeeCredential, EmployeeProfile } from "@/types/em
 export const employeeUsers: EmployeeCredential[] = [
   {
     id: "emp-lead-1",
-    fullName: "Nguyen Minh Quan",
+    fullName: "Nguyễn Minh Quân",
     employeeCode: "BLD001",
-    position: "Ban lanh dao",
+    position: "Ban lãnh đạo",
     department: "LEADERSHIP",
     accessLevel: "FULL",
     permissions: ["DIGITAL", "CONTENT", "VIDEO", "IMAGE", "WEBSITE", "CRM"],
@@ -13,9 +13,9 @@ export const employeeUsers: EmployeeCredential[] = [
   },
   {
     id: "emp-manager-1",
-    fullName: "Tran Hoai An",
+    fullName: "Trần Hoài An",
     employeeCode: "TP001",
-    position: "Truong phong Marketing",
+    position: "Trưởng phòng Marketing",
     department: "MARKETING",
     accessLevel: "FULL",
     permissions: ["DIGITAL", "CONTENT", "VIDEO", "IMAGE", "WEBSITE"],
@@ -23,7 +23,7 @@ export const employeeUsers: EmployeeCredential[] = [
   },
   {
     id: "emp-mkt-1",
-    fullName: "Le Khanh Linh",
+    fullName: "Lê Khánh Linh",
     employeeCode: "MKT001",
     position: "Digital Marketing",
     department: "MARKETING",
@@ -33,9 +33,9 @@ export const employeeUsers: EmployeeCredential[] = [
   },
   {
     id: "emp-sale-1",
-    fullName: "Pham Quoc Huy",
+    fullName: "Phạm Quốc Huy",
     employeeCode: "SALE001",
-    position: "Nhan vien Sale",
+    position: "Nhân viên Sale",
     department: "SALE",
     accessLevel: "STAFF",
     permissions: ["CRM"],
@@ -61,6 +61,6 @@ export function authenticateEmployee(employeeCode: string, password: string) {
 export function departmentLabel(department?: Department) {
   if (department === "MARKETING") return "Marketing";
   if (department === "SALE") return "Sale";
-  if (department === "LEADERSHIP") return "Ban lanh dao";
-  return "Toan cong ty";
+  if (department === "LEADERSHIP") return "Ban lãnh đạo";
+  return "Toàn công ty";
 }

@@ -25,7 +25,7 @@ export function UserMenu({ user }: { user: EmployeeProfile }) {
         <div className="leading-tight">
           <p className="text-xs font-bold text-text-main">{user.fullName}</p>
           <p className="text-[11px] font-semibold text-text-muted">{user.position} · {departmentLabel(user.department)}</p>
-          <p className="max-w-56 truncate text-[11px] font-semibold text-text-soft">{user.accessLevel === "FULL" ? "Toan quyen" : user.permissions.map(permissionLabel).join(", ")}</p>
+          <p className="max-w-56 truncate text-[11px] font-semibold text-text-soft">{user.accessLevel === "FULL" ? "Toàn quyền" : user.permissions.map(permissionLabel).join(", ")}</p>
         </div>
       </div>
       <Button variant="ghost" size="sm" aria-label="Đăng xuất" onClick={logout}>
