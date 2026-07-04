@@ -6,7 +6,7 @@ import type { Lead } from "@/types/crm";
 import type { CampaignEvent } from "@/types/event";
 import type { Task } from "@/types/task";
 
-type MarketingData = {
+export type MarketingData = {
   tasks: Task[];
   contentPosts: ContentPost[];
   approvalItems: ApprovalItem[];

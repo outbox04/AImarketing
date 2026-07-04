@@ -1,20 +1,39 @@
+import { redirect } from "next/navigation";
 import { LayoutGrid, ListFilter } from "lucide-react";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { filterMarketingDataForUser } from "@/lib/auth/access";
+import { getCurrentUser } from "@/lib/auth/session";
 import { getTasksData } from "@/lib/data/marketing-data";
 
-export const revalidate = 15;
+export const dynamic = "force-dynamic";
 
 export default async function TasksPage() {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) redirect("/login");
+
   const data = await getTasksData();
+  const scopedData = filterMarketingDataForUser(
+    {
+      tasks: data.tasks,
+      contentPosts: [],
+      approvalItems: [],
+      campaignEvents: [],
+      leads: [],
+      adsReports: [],
+      source: data.source,
+      errors: data.errors
+    },
+    currentUser
+  );
 
   return (
     <div className="mx-auto max-w-[1600px]">
       <PageHeader
-        eyebrow="Marketing Workflow"
-        title="Task Marketing"
-        description="Kanban gọn cho đội marketing một người: ít cột, thấy ngay việc bị chặn và deadline nguy hiểm."
+        eyebrow="Workflow"
+        title="Task"
+        description="Kanban chỉ hiển thị các việc thuộc phạm vi quyền và phòng ban của tài khoản hiện tại."
         actions={
           <>
             <Button variant="secondary"><ListFilter size={17} /> Lọc task</Button>
@@ -22,7 +41,7 @@ export default async function TasksPage() {
           </>
         }
       />
-      <TaskKanban tasks={data.tasks} />
+      <TaskKanban tasks={scopedData.tasks} />
     </div>
   );
 }

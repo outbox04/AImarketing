@@ -1,8 +1,10 @@
 import { Bell, Command, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import type { EmployeeProfile } from "@/types/employee";
+import { UserMenu } from "./UserMenu";
 
-export function Topbar() {
+export function Topbar({ currentUser }: { currentUser: EmployeeProfile }) {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/85 px-4 py-3 backdrop-blur xl:ml-72 xl:px-8">
       <div className="flex items-center gap-3">
@@ -20,6 +22,7 @@ export function Topbar() {
         <Button variant="secondary" size="sm" aria-label="Thông báo">
           <Bell size={17} />
         </Button>
+        <UserMenu user={currentUser} />
       </div>
     </header>
   );

@@ -1,16 +1,22 @@
+import { redirect } from "next/navigation";
 import { FileDown, Send, WandSparkles } from "lucide-react";
 import { ChartBlock } from "@/components/reports/ChartBlock";
 import { ReportCard } from "@/components/reports/ReportCard";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { filterMarketingDataForUser } from "@/lib/auth/access";
+import { getCurrentUser } from "@/lib/auth/session";
 import { getMarketingData } from "@/lib/data/marketing-data";
 import { getWorkloadSummary } from "@/lib/rules/marketing-rules";
 import type { ReportMetric } from "@/types/report";
 
-export const revalidate = 15;
+export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
-  const data = await getMarketingData();
+  const currentUser = await getCurrentUser();
+  if (!currentUser) redirect("/login");
+
+  const data = filterMarketingDataForUser(await getMarketingData(), currentUser);
   const summary = getWorkloadSummary(data.tasks, data.approvalItems, data.campaignEvents, data.leads, data.adsReports, data.contentPosts);
   const reportMetrics: ReportMetric[] = [
     { id: "r-1", label: "Task hoàn thành", value: String(summary.doneTasks), change: `${data.tasks.length} task tổng`, tone: "success" },
@@ -29,7 +35,7 @@ export default async function ReportsPage() {
       <PageHeader
         eyebrow="Leadership Reporting"
         title="Reports"
-        description="Báo cáo ngày, tuần, tháng, quý cho lãnh đạo: task, content, ads, lead, event, website."
+        description="Báo cáo ngày, tuần, tháng, quý theo phạm vi dữ liệu của tài khoản hiện tại."
         actions={
           <>
             <Button variant="secondary">

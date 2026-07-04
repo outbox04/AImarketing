@@ -1,9 +1,8 @@
-import { ArrowRight, CalendarClock, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { ownerName } from "@/lib/constants";
-import { getRiskFlags, getWorkloadSummary } from "@/lib/rules/marketing-rules";
 import Greeting from "@/components/dashboard/Greeting";
+import { Button } from "@/components/ui/Button";
+import { getRiskFlags, getWorkloadSummary } from "@/lib/rules/marketing-rules";
 import type { AdsReport } from "@/types/ads";
 import type { ApprovalItem, ContentPost } from "@/types/content";
 import type { Lead } from "@/types/crm";
@@ -17,18 +16,17 @@ type MorningDigestProps = {
   campaignEvents: CampaignEvent[];
   leads: Lead[];
   adsReports: AdsReport[];
+  ownerName: string;
 };
-
 
 function splitRiskFlag(value: string) {
   const [title, ...rest] = value.split(":");
   return { title: title.trim(), note: rest.join(":").trim() };
 }
 
-export function MorningDigest({ tasks, contentPosts, approvalItems, campaignEvents, leads, adsReports }: MorningDigestProps) {
+export function MorningDigest({ tasks, contentPosts, approvalItems, campaignEvents, leads, adsReports, ownerName }: MorningDigestProps) {
   const summary = getWorkloadSummary(tasks, approvalItems, campaignEvents, leads, adsReports, contentPosts);
   const riskFlags = getRiskFlags(tasks, approvalItems, campaignEvents, adsReports).slice(0, 3);
-  
 
   return (
     <section className="overflow-hidden rounded-[28px] border border-indigo-100 bg-gradient-to-br from-white via-[#F8FAFF] to-[#EEF2FF] p-6 shadow-soft md:p-8">
@@ -43,11 +41,13 @@ export function MorningDigest({ tasks, contentPosts, approvalItems, campaignEven
             <strong className="text-text-main">{summary.runningEvents} campaign đang chạy</strong>.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/content/approval">
-              <Button variant="primary">
-                Duyệt nội dung <ArrowRight size={17} />
-              </Button>
-            </Link>
+            {approvalItems.length > 0 ? (
+              <Link href="/content/approval">
+                <Button variant="primary">
+                  Duyệt nội dung <ArrowRight size={17} />
+                </Button>
+              </Link>
+            ) : null}
             <Link href="#today-timeline">
               <Button variant="secondary">Xem timeline hôm nay</Button>
             </Link>

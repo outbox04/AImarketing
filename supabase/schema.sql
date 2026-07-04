@@ -7,6 +7,7 @@
   4. campaign_events
   5. leads
   6. ads_reports
+  7. employee_profiles
 */
 
 -- 1. tasks
@@ -116,3 +117,33 @@ create table if not exists ads_reports (
 );
 
 alter table ads_reports enable row level security;
+
+-- 7. employee_profiles
+create table if not exists employee_profiles (
+  id text primary key,
+  full_name text not null,
+  employee_code text not null unique,
+  position text not null,
+  department text,
+  access_level text not null check (access_level in ('FULL', 'STAFF')),
+  permissions text[] not null default '{}',
+  password_hash text,
+  inserted_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  constraint employee_profiles_department_check check (
+    department is null or department in ('LEADERSHIP', 'MARKETING', 'SALE')
+  )
+);
+
+alter table employee_profiles enable row level security;
+
+create table if not exists employee_permission_audit (
+  id bigserial primary key,
+  employee_code text not null,
+  permission text not null,
+  action text not null check (action in ('ADD', 'REMOVE')),
+  changed_by text,
+  changed_at timestamp with time zone default now()
+);
+
+alter table employee_permission_audit enable row level security;

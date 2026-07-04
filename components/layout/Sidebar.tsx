@@ -1,12 +1,15 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
+import { filterNavigationGroups } from "@/lib/auth/access";
 import { cn } from "@/lib/utils";
+import type { EmployeeProfile } from "@/types/employee";
 import { InstantLink, useNavigationFeedback } from "./NavigationFeedback";
 import { navigationGroups } from "./navigation";
 
-export function Sidebar() {
+export function Sidebar({ currentUser }: { currentUser: EmployeeProfile }) {
   const { optimisticPathname } = useNavigationFeedback();
+  const visibleGroups = filterNavigationGroups(navigationGroups, currentUser);
 
   return (
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 border-r border-border bg-white/90 px-4 py-5 backdrop-blur xl:block">
@@ -20,7 +23,7 @@ export function Sidebar() {
         </div>
       </InstantLink>
       <nav className="space-y-6 overflow-y-auto pb-6">
-        {navigationGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.label}>
             <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-text-soft">{group.label}</p>
             <div className="space-y-1">
